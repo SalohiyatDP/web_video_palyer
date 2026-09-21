@@ -258,9 +258,87 @@ function probeDuration(file) {
 }
 
 /* ---------------------------------------------------------------- *
- * Yuklash (XHR — progress ko‘rsatish uchun)
+ * Yuklash
+ *
+ * Server sozlamasiga qarab ikki usul:
+ *  - `single`  (Node serveri) — fayl bitta so‘rovda yuboriladi;
+ *  - `chunked` (PHP varianti) — fayl bo‘laklab yuboriladi, chunki oddiy
+ *    hostinglarda bitta so‘rov hajmi 8 MB atrofida cheklangan bo‘ladi.
  * ---------------------------------------------------------------- */
+let serverConfig = { uploadMode: 'single', chunkBytes: 4 * 1024 * 1024 };
+let configPromise = null;
+
+/** Server sozlamasini bir marta o‘qiydi (keyingi chaqiruvlar shu natijani kutadi). */
+function ensureServerConfig() {
+  configPromise ??= (async () => {
+    try {
+      serverConfig = { ...serverConfig, ...(await apiRequest('/api/config')) };
+    } catch { /* sozlama olinmasa — standart usul */ }
+  })();
+  return configPromise;
+}
+
+function showProgress(loaded, total) {
+  const percent = total ? Math.min(100, Math.round((loaded / total) * 100)) : 0;
+  progressBar.style.width = `${percent}%`;
+  setStatus(`Yuklanmoqda… ${percent}%`);
+}
+
+/** Bo‘laklab yuklash: har bir bo‘lak alohida so‘rovda yuboriladi. */
+async function uploadInChunks(file, meta) {
+  const { uploadId } = await apiRequest('/api/uploads', { method: 'POST' });
+  const chunkSize = Math.max(256 * 1024, Number(serverConfig.chunkBytes) || 4 * 1024 * 1024);
+  let offset = 0;
+
+  while (offset < file.size) {
+    const chunk = file.slice(offset, offset + chunkSize);
+    let response;
+    let lastError;
+    // Tarmoq uzilishlariga chidamli bo‘lishi uchun 3 martagacha qayta urinamiz
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        response = await fetch(`/api/uploads/${uploadId}?offset=${offset}`, {
+          method: 'PUT',
+          headers: { 'content-type': 'application/octet-stream' },
+          body: chunk,
+        });
+        break;
+      } catch (error) {
+        lastError = error;
+        await new Promise((resolve) => setTimeout(resolve, 600 * (attempt + 1)));
+      }
+    }
+    if (!response) throw new Error(`Tarmoq xatosi: ${lastError?.message || 'yuklash uzildi'}`);
+
+    if (!response.ok) {
+      const payload = await response.json().catch(() => ({}));
+      // Server qayerdan davom etish kerakligini aytsa — shu joydan davom etamiz
+      if (response.status === 409 && Number.isFinite(payload.expectedOffset)) {
+        offset = payload.expectedOffset;
+        continue;
+      }
+      throw new Error(payload.error || `Yuklashda xatolik (${response.status})`);
+    }
+
+    const { received } = await response.json().catch(() => ({}));
+    offset = Number.isFinite(received) ? received : offset + chunk.size;
+    showProgress(offset, file.size);
+  }
+
+  const { video } = await apiRequest(`/api/uploads/${uploadId}/finish`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ ...meta, mimeType: file.type || '' }),
+  });
+  return video;
+}
+
 function uploadVideo(file, meta) {
+  if (serverConfig.uploadMode === 'chunked') return uploadInChunks(file, meta);
+  return uploadInOneRequest(file, meta);
+}
+
+function uploadInOneRequest(file, meta) {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open('POST', '/api/videos');
@@ -270,10 +348,7 @@ function uploadVideo(file, meta) {
     xhr.setRequestHeader('x-video-meta', encoded);
 
     xhr.upload.onprogress = (event) => {
-      if (!event.lengthComputable) return;
-      const percent = Math.round((event.loaded / event.total) * 100);
-      progressBar.style.width = `${percent}%`;
-      setStatus(`Yuklanmoqda… ${percent}%`);
+      if (event.lengthComputable) showProgress(event.loaded, event.total);
     };
     xhr.onload = () => {
       let payload = null;
@@ -301,6 +376,7 @@ form.addEventListener('submit', async (event) => {
   setStatus('Video tahlil qilinmoqda…');
 
   try {
+    await ensureServerConfig();
     const durationSeconds = await probeDuration(selectedFile);
     const meta = {
       title,
@@ -435,5 +511,6 @@ grid.addEventListener('click', async (event) => {
 searchInput.addEventListener('input', render);
 refreshBtn.addEventListener('click', loadVideos);
 
+ensureServerConfig();
 checkSession();
 loadVideos();
