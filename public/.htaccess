@@ -1,0 +1,43 @@
+# ====================================================================
+#  Yer maydonlari video arxivi — Apache sozlamasi (PHP varianti)
+#  Bu fayl saytning ildiz papkasida (public_html) turishi kerak.
+# ====================================================================
+
+# Papka ichidagi fayllar ro'yxati ko'rinmasin
+Options -Indexes
+
+# Bosh sahifa
+DirectoryIndex index.html index.php
+
+# Ma'lumotlar papkasi tashqaridan ochilmasin (videolar index.php orqali beriladi)
+RedirectMatch 404 ^/data/
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # Mavjud fayl yoki papka bo'lsa — o'zini beramiz (css, js, rasmlar)
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # Qolgan hamma so'rov (/api/…, /media/…, /v/…) index.php ga
+  RewriteRule ^ index.php [QSA,L]
+</IfModule>
+
+# Videolar bo'laklab (4 MB) yuklanadi, shuning uchun hostingning standart
+# chegaralari (post_max_size = 8M) yetarli — hech narsani o'zgartirish shart emas.
+# Agar bo'lak hajmini kattalashtirmoqchi bo'lsangiz, index.php'dagi
+# $CHUNK_BYTES qiymatini va quyidagi qatorlarni moslashtiring:
+# <IfModule mod_php.c>
+#   php_value post_max_size 16M
+#   php_value max_execution_time 300
+# </IfModule>
+
+# Statik fayllar uchun kesh
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/css "access plus 7 days"
+  ExpiresByType application/javascript "access plus 7 days"
+  ExpiresByType image/svg+xml "access plus 7 days"
+</IfModule>

@@ -405,6 +405,8 @@ async function route(req, res) {
     return sendJson(res, 200, {
       publicBaseUrl: PUBLIC_BASE_URL,
       maxUploadBytes: MAX_UPLOAD_BYTES,
+      // Node serverida fayl bir so‘rovda yuboriladi (PHP variantida — bo‘laklab)
+      uploadMode: 'single',
     });
   }
   if (pathname === '/api/session' && method === 'GET') {
@@ -494,6 +496,9 @@ async function route(req, res) {
 
     const requested = path.normalize(path.join(PUBLIC_DIR, pathname));
     if (!requested.startsWith(PUBLIC_DIR + path.sep)) return sendText(res, 403, '403 — ruxsat yo\u2018q');
+    // PHP varianti fayllari (index.php, .htaccess) shu papkada yotadi —
+    // Node serverida ular hech qachon uzatilmasligi kerak
+    if (/\.(php|htaccess)$/i.test(requested)) return sendText(res, 404, '404 — fayl topilmadi');
     return serveFile(req, res, requested, {
       cacheControl: pathname.startsWith('/js/') || pathname.startsWith('/css/') ? 'no-cache' : 'public, max-age=600',
     });
