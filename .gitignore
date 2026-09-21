@@ -1,0 +1,14 @@
+# Yuklangan videolar va metama'lumotlar (repozitoriyga kirmaydi)
+data/
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Muhit sozlamalari
+.env
+.env.local
+
+# OS
+.DS_Store
+Thumbs.db
