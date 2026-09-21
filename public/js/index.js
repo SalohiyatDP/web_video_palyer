@@ -14,6 +14,16 @@ const progress = document.getElementById('progress');
 const progressBar = document.getElementById('progress-bar');
 const statusEl = document.getElementById('status');
 const grid = document.getElementById('video-grid');
+const uploaderSection = document.getElementById('yuklash');
+const publicNote = document.getElementById('public-note');
+const addLink = document.getElementById('add-link');
+const loginBtn = document.getElementById('login-btn');
+const logoutBtn = document.getElementById('logout-btn');
+const loginDialog = document.getElementById('login-dialog');
+const loginForm = document.getElementById('login-form');
+const loginStatus = document.getElementById('login-status');
+const loginSubmit = document.getElementById('login-submit');
+const passwordInput = document.getElementById('password');
 const emptyEl = document.getElementById('empty');
 const countEl = document.getElementById('count');
 const searchInput = document.getElementById('search');
@@ -22,6 +32,76 @@ const refreshBtn = document.getElementById('refresh-btn');
 let selectedFile = null;
 let previewUrl = null;
 let videos = [];
+/** Administrator sifatida kirilganmi? Yuklash/o‘chirish faqat shunda ko‘rinadi. */
+let isAdmin = false;
+
+/* ---------------------------------------------------------------- *
+ * Administrator kirishi
+ * ---------------------------------------------------------------- */
+function applyAdminState(admin) {
+  isAdmin = admin;
+  uploaderSection.hidden = !admin;
+  addLink.hidden = !admin;
+  logoutBtn.hidden = !admin;
+  loginBtn.hidden = admin;
+  publicNote.hidden = admin;
+  render();
+}
+
+async function checkSession() {
+  try {
+    const { admin } = await apiRequest('/api/session');
+    applyAdminState(Boolean(admin));
+  } catch {
+    applyAdminState(false);
+  }
+}
+
+loginBtn.addEventListener('click', () => {
+  loginStatus.textContent = '';
+  passwordInput.value = '';
+  loginDialog.showModal();
+  passwordInput.focus();
+});
+
+document.getElementById('login-cancel').addEventListener('click', () => loginDialog.close());
+
+loginForm.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const password = passwordInput.value;
+  if (!password) {
+    loginStatus.className = 'status status--error';
+    loginStatus.textContent = 'Parolni kiriting.';
+    return;
+  }
+  loginSubmit.disabled = true;
+  loginStatus.className = 'status';
+  loginStatus.textContent = 'Tekshirilmoqda…';
+  try {
+    await apiRequest('/api/login', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ password }),
+    });
+    loginDialog.close();
+    applyAdminState(true);
+    setStatus('Administrator sifatida kirdingiz — endi video yuklashingiz mumkin.', 'ok');
+    uploaderSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } catch (error) {
+    loginStatus.className = 'status status--error';
+    loginStatus.textContent = error.message;
+  } finally {
+    loginSubmit.disabled = false;
+  }
+});
+
+logoutBtn.addEventListener('click', async () => {
+  try {
+    await apiRequest('/api/logout', { method: 'POST' });
+  } catch { /* ahamiyatsiz */ }
+  applyAdminState(false);
+  setStatus('');
+});
 
 /* ---------------------------------------------------------------- *
  * Fayl tanlash
@@ -255,6 +335,8 @@ form.addEventListener('submit', async (event) => {
     await loadVideos();
   } catch (error) {
     setStatus(error.message, 'error');
+    // Sessiya tugagan bo‘lsa — qaytadan kirish kerak
+    if (/administrator/i.test(error.message)) applyAdminState(false);
   } finally {
     submitBtn.disabled = false;
     setTimeout(() => progress.classList.remove('is-active'), 1200);
@@ -293,8 +375,8 @@ function cardHtml(video) {
         <div class="video-card__actions">
           <a class="btn btn--sm" href="${href}">${icon('play')} Ko‘rish</a>
           <a class="btn btn--outline btn--sm" href="${href}#qr">${icon('qr')} QR-kod</a>
-          <button class="btn btn--danger btn--sm btn--icon" type="button" data-delete="${video.id}"
-                  title="Videoni o‘chirish" aria-label="Videoni o‘chirish">${icon('trash')}</button>
+          ${isAdmin ? `<button class="btn btn--danger btn--sm btn--icon" type="button" data-delete="${video.id}"
+                  title="Videoni o‘chirish" aria-label="Videoni o‘chirish">${icon('trash')}</button>` : ''}
         </div>
       </div>
     </article>`;
@@ -346,10 +428,12 @@ grid.addEventListener('click', async (event) => {
   } catch (error) {
     button.disabled = false;
     window.alert(`O‘chirishda xatolik: ${error.message}`);
+    if (/administrator/i.test(error.message)) applyAdminState(false);
   }
 });
 
 searchInput.addEventListener('input', render);
 refreshBtn.addEventListener('click', loadVideos);
 
+checkSession();
 loadVideos();
