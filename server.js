@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * «Наманган туристик-рекреацион ҳудудларини ривожлантириш дирекцияси» —
+ * «Namangan turistik-rekreatsion hududlarini rivojlantirish direksiyasi» —
  * yer maydonlari videolari uchun oddiy video-player sayti.
  *
  * Tashqi kutubxonalarsiz (faqat Node.js standart modullari) ishlaydi.

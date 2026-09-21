@@ -1,9 +1,9 @@
 # Yer maydonlari video arxivi
 
-Ўзбекистон Республикаси Президентининг **2026 йил 11 июндаги ПҚ-220-сон** қарорининг
-**7-иловасига** мувофиқ **«Наманган туристик-рекреацион ҳудудларини ривожлантириш дирекцияси»**га
-доимий фойдаланиш ҳуқуқи асосида бириктирилган ер майдонлари ҳақида тайёрланган
-видеолар учун оддий веб-сайт.
+O‘zbekiston Respublikasi Prezidentining **2026 yil 11 iyundagi PQ-220-son** qarorining
+**7-ilovasiga** muvofiq **«Namangan turistik-rekreatsion hududlarini rivojlantirish direksiyasi»**ga
+doimiy foydalanish huquqi asosida biriktirilgan yer maydonlari haqida tayyorlangan
+videolar uchun veb-sayt.
 
 Sayt uch vazifani bajaradi:
 

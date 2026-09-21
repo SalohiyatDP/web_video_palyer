@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Yer maydonlari video arxivi — oddiy (serversiz) variant</title>
-<meta name="description" content="ПҚ-220-сон қарорининг 7-иловасига мувофиқ «Наманган туристик-рекреацион ҳудудларини ривожлантириш дирекцияси»га бириктирилган ер майдонлари видеолari." />
+<meta name="description" content="PQ-220-son qarorining 7-ilovasiga muvofiq «Namangan turistik-rekreatsion hududlarini rivojlantirish direksiyasi»ga biriktirilgan yer maydonlari videolari." />
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230f5741'/%3E%3Cpath d='M4 24l7.5-11 4.5 6.5L19.5 15 28 24H4z' fill='%23f2b33d'/%3E%3Ccircle cx='23' cy='9' r='3' fill='%23fff' opacity='.9'/%3E%3C/svg%3E" />
 <style>
 /* ==================================================================
@@ -162,6 +162,22 @@ textarea{min-height:92px;resize:vertical}
 .qr-link-field input{font-size:12.5px;padding:8px 10px}
 .qr-actions{display:grid;gap:8px;margin-top:12px}
 
+/* kirish oynasi va mehmon izohi */
+.site-header__nav{margin-left:auto;display:flex;gap:10px;flex:none}
+.login-dialog{border:1px solid var(--line);border-radius:var(--radius);padding:0;max-width:440px;
+  width:calc(100% - 32px);box-shadow:0 18px 50px rgba(7,43,33,.25)}
+.login-dialog::backdrop{background:rgba(7,43,33,.45)}
+.login-dialog form{padding:22px;display:grid;gap:6px}
+.login-dialog h2{font-size:18px}
+.login-dialog p.muted{font-size:13.5px;margin:2px 0 12px}
+.login-dialog label{margin-top:4px}
+.login-dialog__note{font-size:12.5px;color:var(--ink-soft);background:#f6f9f8;border:1px solid var(--line);
+  border-radius:10px;padding:10px 12px;margin:12px 0 0}
+.login-dialog__note code{font-size:12px}
+.login-dialog__actions{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+.public-note{display:flex;align-items:center;gap:9px;margin:0 0 22px;padding:12px 16px;border-radius:12px;
+  background:var(--green-100);border:1px solid #cfe9df;color:var(--green-700);font-size:14px}
+
 /* futer */
 .site-footer{border-top:1px solid var(--line);background:#fff;padding:20px 0;font-size:13px;color:var(--ink-soft)}
 .site-footer__inner{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
@@ -203,6 +219,8 @@ textarea{min-height:92px;resize:vertical}
   <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
   <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 13l4.5 4.5L19 7"/></symbol>
   <symbol id="i-warn" viewBox="0 0 24 24"><path d="M12 4l9 16H3l9-16z"/><path d="M12 10v4.5M12 17.2v.3"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><path d="M6 11h12v9H6zM8.5 11V7.5a3.5 3.5 0 017 0V11"/></symbol>
+  <symbol id="i-logout" viewBox="0 0 24 24"><path d="M14 5H6a1 1 0 00-1 1v12a1 1 0 001 1h8M17 8l3.5 4-3.5 4M20 12h-9"/></symbol>
 </defs></svg>
 
 <header class="site-header">
@@ -212,14 +230,45 @@ textarea{min-height:92px;resize:vertical}
       <div class="site-header__eyebrow">Video arxiv</div>
       <h1>Yer maydonlari bo‘yicha video ma’lumotlar</h1>
       <p class="site-header__legal">
-        Ўзбекистон Республикаси Президентининг 2026 йил 11 июндаги ПҚ-220-сон қарорининг
-        7-иловасига мувофиқ «Наманган туристик-рекреацион ҳудудларини ривожлантириш дирекцияси»га
-        доимий фойдаланиш ҳуқуқи асосида бириктирилган ер майдонлари ҳақида тайёрланган видеолар.
+        O‘zbekiston Respublikasi Prezidentining 2026 yil 11 iyundagi PQ-220-son qarorining
+        7-ilovasiga muvofiq «Namangan turistik-rekreatsion hududlarini rivojlantirish direksiyasi»ga
+        doimiy foydalanish huquqi asosida biriktirilgan yer maydonlari haqida tayyorlangan videolar.
       </p>
       <span class="badge">Oddiy variant — bitta HTML fayl, server kerak emas</span>
     </div>
+    <nav class="site-header__nav">
+      <button class="btn btn--ghost" type="button" id="login-btn">
+        <svg class="ico"><use href="#i-lock"></use></svg> Administrator kirishi
+      </button>
+      <button class="btn btn--ghost" type="button" id="logout-btn" hidden>
+        <svg class="ico"><use href="#i-logout"></use></svg> Chiqish
+      </button>
+    </nav>
   </div>
 </header>
+
+<!-- Administrator kirishi -->
+<dialog class="login-dialog" id="login-dialog">
+  <form id="login-form" method="dialog">
+    <h2>Administrator kirishi</h2>
+    <p class="muted">Video qo‘shish va o‘chirish uchun parolni kiriting.
+      Videolarni ko‘rish uchun parol talab qilinmaydi.</p>
+    <label for="password">Parol</label>
+    <input type="password" id="password" autocomplete="current-password" />
+    <div class="status" id="login-status" role="status" aria-live="polite"></div>
+    <p class="login-dialog__note">
+      Eslatma: bu yengil qulflash. HTML fayl foydalanuvchining o‘zida bo‘lgani uchun
+      parolni fayl kodidan ko‘rish mumkin. Internetga joylanadigan, haqiqiy himoyalangan
+      sayt uchun server varianti (<code>server.js</code>) ishlatiladi.
+    </p>
+    <div class="login-dialog__actions">
+      <button class="btn" type="submit" id="login-submit">
+        <svg class="ico"><use href="#i-lock"></use></svg> Kirish
+      </button>
+      <button class="btn btn--outline" type="button" id="login-cancel">Bekor qilish</button>
+    </div>
+  </form>
+</dialog>
 
 <main class="wrap">
   <div class="banner" id="banner">
@@ -273,8 +322,14 @@ textarea{min-height:92px;resize:vertical}
     </aside>
   </section>
 
+  <p class="public-note" id="public-note">
+    <svg class="ico" aria-hidden="true"><use href="#i-play-circle"></use></svg>
+    Quyidagi videolarni erkin ko‘rishingiz mumkin. Yangi video qo‘shish va o‘chirish
+    uchun administrator sifatida kirish kerak.
+  </p>
+
   <!-- ------------------------- Yuklash formasi ------------------------ -->
-  <section class="card uploader" id="yuklash">
+  <section class="card uploader" id="yuklash" hidden>
     <div class="uploader__head">
       <h2>Yangi video qo‘shish</h2>
       <p>Videoni tanlang, nomi va tasnifini kiriting. Video shu brauzer xotirasida saqlanadi va unga QR-kod yaratiladi.</p>
@@ -353,7 +408,7 @@ textarea{min-height:92px;resize:vertical}
 
 <footer class="site-footer">
   <div class="wrap site-footer__inner">
-    <span>«Наманган туристик-рекреацион ҳудудларини ривожлантириш дирекцияси» — video arxiv</span>
+    <span>«Namangan turistik-rekreatsion hududlarini rivojlantirish direksiyasi» — video arxiv</span>
     <span id="storage-info"></span>
   </div>
 </footer>
@@ -929,6 +984,15 @@ const QR = (function () {
    2-QISM. Saytning o‘z mantiqi
    ================================================================== */
 (function () {
+  /* ================================================================ *
+   *  SOZLAMA: administrator paroli.
+   *  Quyidagi qiymatni o‘zingizning parolingizga o‘zgartirib qo‘ying.
+   *  Diqqat: bu yengil qulflash — HTML fayl foydalanuvchida bo‘lsa, parolni
+   *  fayl kodidan ko‘rish mumkin. Internetga joylanadigan, haqiqiy
+   *  himoyalangan sayt uchun `server.js` variantidan foydalaning.
+   * ================================================================ */
+  const ADMIN_PASSWORD = 'namangan2026';
+
   /* -------------------- kichik yordamchi funksiyalar ---------------- */
   const $ = (id) => document.getElementById(id);
   const icon = (name) => `<svg class="ico" aria-hidden="true"><use href="#i-${name}"></use></svg>`;
@@ -1040,6 +1104,55 @@ const QR = (function () {
       else this.memory.delete(id);
     },
   };
+
+  /* ------------------------ Administrator rejimi -------------------- *
+   * Birinchi kirishda sayt faqat ko‘rish rejimida bo‘ladi: yuklash formasi
+   * va o‘chirish tugmalari ko‘rinmaydi. Parol kiritilgach — boshqaruv
+   * rejimi yoqiladi (brauzer yorlig‘i yopilguncha saqlanadi).
+   * ------------------------------------------------------------------ */
+  const ADMIN_FLAG = 'video-arxiv-admin';
+  let isAdmin = false;
+
+  function applyAdminState(admin) {
+    isAdmin = admin;
+    $('yuklash').hidden = !admin;
+    $('public-note').hidden = admin;
+    $('logout-btn').hidden = !admin;
+    $('login-btn').hidden = admin;
+    try {
+      if (admin) sessionStorage.setItem(ADMIN_FLAG, '1');
+      else sessionStorage.removeItem(ADMIN_FLAG);
+    } catch { /* sessionStorage bo‘lmasa ham ishlaydi */ }
+    render();
+  }
+
+  $('login-btn').addEventListener('click', () => {
+    $('login-status').textContent = '';
+    $('password').value = '';
+    $('login-dialog').showModal();
+    $('password').focus();
+  });
+
+  $('login-cancel').addEventListener('click', () => $('login-dialog').close());
+
+  $('login-form').addEventListener('submit', (event) => {
+    event.preventDefault();
+    const status = $('login-status');
+    if ($('password').value === ADMIN_PASSWORD) {
+      $('login-dialog').close();
+      applyAdminState(true);
+      setStatus('Administrator rejimi yoqildi — endi video qo‘shishingiz mumkin.', 'ok');
+      $('yuklash').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      status.className = 'status status--error';
+      status.textContent = 'Parol noto‘g‘ri.';
+    }
+  });
+
+  $('logout-btn').addEventListener('click', () => {
+    applyAdminState(false);
+    setStatus('');
+  });
 
   /* --------------------------- Fayl tanlash ------------------------- */
   let selectedFile = null;
@@ -1212,8 +1325,8 @@ const QR = (function () {
           <div class="video-card__actions">
             <button class="btn btn--sm" type="button" data-open="${video.id}">${icon('play')} Ko‘rish</button>
             <button class="btn btn--outline btn--sm" type="button" data-open="${video.id}">${icon('qr')} QR-kod</button>
-            <button class="btn btn--danger btn--sm btn--icon" type="button" data-delete="${video.id}"
-                    title="Videoni o‘chirish" aria-label="Videoni o‘chirish">${icon('trash')}</button>
+            ${isAdmin ? `<button class="btn btn--danger btn--sm btn--icon" type="button" data-delete="${video.id}"
+                    title="Videoni o‘chirish" aria-label="Videoni o‘chirish">${icon('trash')}</button>` : ''}
           </div>
         </div>
       </article>`;
@@ -1420,6 +1533,11 @@ const QR = (function () {
 
   /* ------------------------------ Boshlash ------------------------- */
   (async function start() {
+    // Birinchi kirishda — faqat ko‘rish rejimi
+    let wasAdmin = false;
+    try { wasAdmin = sessionStorage.getItem(ADMIN_FLAG) === '1'; } catch { /* e’tiborsiz */ }
+    applyAdminState(wasAdmin);
+
     const ok = await storage.open();
     if (!ok) {
       showBanner('Videolar vaqtinchalik saqlanadi',
