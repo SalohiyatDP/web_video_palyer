@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * «Наманган туристик-рекреацион ҳудудларини ривожлантириш дирекцияси» —
+ * «Namangan turistik-rekreatsion hududlarini rivojlantirish direksiyasi» —
  * yer maydonlari videolari uchun oddiy video-player sayti.
  *
  * Tashqi kutubxonalarsiz (faqat Node.js standart modullari) ishlaydi.
@@ -12,6 +12,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { createStore } from './lib/store.js';
+import { createAuth } from './lib/auth.js';
 
 const ROOT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC_DIR = path.join(ROOT_DIR, 'public');
@@ -30,7 +31,17 @@ const MAX_UPLOAD_BYTES = Number(process.env.MAX_UPLOAD_BYTES || 512 * 1024 * 102
 const PUBLIC_BASE_URL = String(process.env.PUBLIC_BASE_URL || '').trim().replace(/\/+$/, '');
 const MAX_POSTER_BYTES = 4 * 1024 * 1024; // 4 MB
 
+/**
+ * Administrator paroli. Videolarni yuklash va o‘chirish faqat shu parol bilan
+ * kirgan foydalanuvchiga ruxsat etiladi; videolarni ko‘rish hammaga ochiq.
+ * Parol berilmasa — tasodifiy parol yaratiladi va konsolga chiqariladi.
+ */
+const ADMIN_PASSWORD = String(process.env.ADMIN_PASSWORD || '').trim()
+  || crypto.randomBytes(6).toString('base64url');
+const PASSWORD_WAS_GENERATED = !String(process.env.ADMIN_PASSWORD || '').trim();
+
 const store = createStore(CATALOG_FILE);
+let auth;
 
 /* ------------------------------------------------------------------ *
  * Yordamchi funksiyalar
@@ -382,23 +393,47 @@ async function handleMetaUpdate(req, res, id) {
  * Routing
  * ------------------------------------------------------------------ */
 const ID_PATTERN = /^[a-f0-9]{10}$/;
+const ADMIN_REQUIRED = 'Bu amal uchun administrator sifatida kirish kerak.';
 
 async function route(req, res) {
   const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
   const pathname = decodeURIComponent(url.pathname);
   const method = req.method || 'GET';
 
-  // --- API ---
+  // --- API: hammaga ochiq ---
   if (pathname === '/api/config' && method === 'GET') {
     return sendJson(res, 200, {
       publicBaseUrl: PUBLIC_BASE_URL,
       maxUploadBytes: MAX_UPLOAD_BYTES,
     });
   }
+  if (pathname === '/api/session' && method === 'GET') {
+    return sendJson(res, 200, { admin: auth.isAdmin(req) });
+  }
+  if (pathname === '/api/login' && method === 'POST') {
+    const raw = await receiveBuffer(req, 4 * 1024);
+    let payload = {};
+    try {
+      payload = JSON.parse(raw.toString('utf8') || '{}');
+    } catch {
+      return sendJson(res, 400, { error: 'JSON noto\u2018g\u2018ri' });
+    }
+    const result = auth.login(req, String(payload.password || ''));
+    if (!result.ok) return sendJson(res, result.status, { error: result.error });
+    res.setHeader('set-cookie', result.setCookie);
+    return sendJson(res, 200, { admin: true });
+  }
+  if (pathname === '/api/logout' && method === 'POST') {
+    res.setHeader('set-cookie', auth.logoutCookie(req));
+    return sendJson(res, 200, { admin: false });
+  }
   if (pathname === '/api/videos' && method === 'GET') {
     return sendJson(res, 200, { videos: await store.list() });
   }
+
+  // --- API: faqat administrator uchun ---
   if (pathname === '/api/videos' && method === 'POST') {
+    if (!auth.isAdmin(req)) return sendJson(res, 401, { error: ADMIN_REQUIRED });
     return handleUpload(req, res);
   }
 
@@ -406,11 +441,16 @@ async function route(req, res) {
   if (apiMatch) {
     const id = apiMatch[1];
     if (!ID_PATTERN.test(id)) return sendJson(res, 400, { error: 'ID noto\u2018g\u2018ri' });
-    if (apiMatch[2] === '/poster' && method === 'POST') return handlePosterUpload(req, res, id);
+    // O‘qish hammaga ochiq
     if (!apiMatch[2] && method === 'GET') {
       const video = await store.get(id);
       return video ? sendJson(res, 200, { video }) : sendJson(res, 404, { error: 'Video topilmadi' });
     }
+    // O‘zgartiradigan amallar — faqat administrator
+    if (['POST', 'PATCH', 'PUT', 'DELETE'].includes(method) && !auth.isAdmin(req)) {
+      return sendJson(res, 401, { error: ADMIN_REQUIRED });
+    }
+    if (apiMatch[2] === '/poster' && method === 'POST') return handlePosterUpload(req, res, id);
     if (!apiMatch[2] && (method === 'PATCH' || method === 'PUT')) return handleMetaUpdate(req, res, id);
     if (!apiMatch[2] && method === 'DELETE') return handleDelete(res, id);
     return sendJson(res, 405, { error: 'Bu metod qo\u2018llanmaydi' });
@@ -477,10 +517,23 @@ server.headersTimeout = 60_000;
 async function main() {
   await fsp.mkdir(UPLOAD_DIR, { recursive: true });
   await fsp.mkdir(POSTER_DIR, { recursive: true });
+  auth = await createAuth({ dataDir: DATA_DIR, password: ADMIN_PASSWORD });
+
   server.listen(PORT, HOST, () => {
     console.log(`▶ Sayt ishga tushdi:  http://localhost:${PORT}`);
     console.log(`  Maʼlumotlar papkasi: ${DATA_DIR}`);
     console.log(`  Maksimal video hajmi: ${Math.round(MAX_UPLOAD_BYTES / 1024 / 1024)} MB`);
+    console.log(`  QR manzili: ${PUBLIC_BASE_URL || '(brauzerdagi joriy manzil)'}`);
+    console.log('  Videolarni koʻrish — hammaga ochiq; yuklash va oʻchirish — parol bilan.');
+    if (PASSWORD_WAS_GENERATED) {
+      const line = '  ' + '─'.repeat(62);
+      console.log('');
+      console.log(line);
+      console.log(`  Administrator paroli: ${ADMIN_PASSWORD}`);
+      console.log('  (tasodifiy yaratildi — doimiy parol uchun ADMIN_PASSWORD');
+      console.log('   muhit oʻzgaruvchisini sozlang)');
+      console.log(line);
+    }
   });
 }
 
