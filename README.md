@@ -13,12 +13,18 @@ Sayt uch vazifani bajaradi:
 3. **QR-kod** — har bir video uchun unga olib boradigan havola QR-kod shaklida
    avtomatik yaratiladi, uni PNG sifatida yuklab olish yoki chop etish mumkin.
 
-## Ikki variant mavjud
+## Uchta variant mavjud
 
-| Variant | Fayl | Qanday ishlatiladi | Qachon qulay |
-| ------- | ---- | ------------------ | ------------ |
-| **Oddiy (serversiz)** | `oddiy.html` | Faylni brauzerda ochish kifoya | Tez sinab ko‘rish, bitta kompyuterda ishlash |
-| **Server bilan** | `server.js` + `public/` | `node server.js` va `http://localhost:3000` | Haqiqiy sayt: videolar serverda turadi, QR havolasi hammada ishlaydi |
+| Variant | Nima kerak | Videolar qayerda saqlanadi | Qachon tanlanadi |
+| ------- | ---------- | -------------------------- | ---------------- |
+| **PHP** (`public/index.php`) | Oddiy hosting (PHP 8+, cPanel/FTP) | **Hostingda**: `data/uploads/` | **Hostingga joylash uchun asosiy variant** |
+| **Node.js** (`server.js`) | VPS yoki Node.js qo‘llovi | **Serverda**: `data/uploads/` | O‘z serveringiz (VPS) bo‘lsa |
+| **Oddiy fayl** (`oddiy.html`) | Faqat brauzer | Brauzer xotirasida (faqat shu kompyuterda) | Tez sinab ko‘rish uchun |
+
+Ikkala server varianti (PHP va Node.js) bir xil ishlaydi: **video hostingga yuklanadi**,
+keyin uni istalgan qurilmadan — telefon, kompyuter — ko‘rish mumkin, QR-kod ham
+shu manzilga ishlaydi. Ikkisi bir xil `data/videos.json` formatidan foydalanadi,
+shuning uchun keyinchalik PHP’dan Node.js’ga (yoki teskari) o‘tish mumkin.
 
 ### Oddiy variant: `oddiy.html`
 
@@ -51,7 +57,60 @@ player va QR-kod paydo bo‘ladi.
 - Videolar `data/uploads/` papkasida, ma’lumotlar `data/videos.json` faylida saqlanadi
   (ma’lumotlar bazasi kerak emas).
 
-## Server variantini ishga tushirish
+## PHP variantini hostingga joylash (eng oddiy yo‘l)
+
+Bu variant oddiy hostinglarda (cPanel, DirectAdmin, FTP) ishlaydi — Node.js,
+ma’lumotlar bazasi yoki `composer` talab qilinmaydi. Faqat **PHP 8.0+** kerak.
+
+**1. Parolni belgilash.** `public/index.php` faylini ochib, boshidagi qatorni
+o‘zgartiring:
+
+```php
+$ADMIN_PASSWORD = getenv('ADMIN_PASSWORD') ?: 'namangan2026';   // ← parolni almashtiring
+```
+
+Xohlasangiz, QR-kodlar uchun domenni ham ko‘rsatib qo‘yasiz:
+
+```php
+$PUBLIC_BASE_URL = getenv('PUBLIC_BASE_URL') ?: 'https://video.namangan.uz';
+```
+
+**2. Fayllarni yuklash.** `public/` papkasi **ichidagi hamma narsani** hostingdagi
+`public_html` (yoki `www`) papkasiga FTP orqali ko‘chirasiz:
+
+```
+public_html/
+├── index.php        ← saytning “miyyasi”
+├── .htaccess        ← manzillarni index.php ga yo‘naltiradi
+├── index.html       ← bosh sahifa
+├── video.html       ← video sahifasi
+├── favicon.svg
+├── css/styles.css
+└── js/…
+```
+
+**3. Papka huquqlari.** `data/` papkasi birinchi so‘rovda avtomatik yaratiladi
+(imkon bo‘lsa `public_html` dan tashqarida — bu xavfsizroq). Agar «papka
+yaratilmadi» xatosi chiqsa, `public_html` ga yozish huquqini bering
+(fayl menejerida `755`, ba’zi hostinglarda `775`).
+
+**4. Tekshirish.** Saytni ochib, «Administrator kirishi» orqali parolni kiriting
+va bitta video yuklang. Video hostingdagi `data/uploads/` papkasiga tushadi,
+`data/videos.json` faylida esa uning nomi va tasnifi saqlanadi.
+
+### Katta videolar qanday yuklanadi
+
+Hostinglarda bitta so‘rov hajmi odatda 8 MB atrofida cheklangan
+(`post_max_size`), shuning uchun sayt videoni **bo‘laklab (4 MB)** yuklaydi va
+serverda birlashtiradi. Ya’ni hosting sozlamalarini o‘zgartirmasdan ham
+yuzlab megabaytli video yuklanadi. Bo‘lak hajmini `index.php` dagi
+`$CHUNK_BYTES` orqali o‘zgartirish mumkin.
+
+Agar hosting `mod_rewrite` ni qo‘llamasa (sayt ochilib, lekin videolar
+ro‘yxati kelmasa), hosting egasidan `.htaccess` va `mod_rewrite` ni yoqishni
+so‘rang — ular deyarli hamma joyda yoqilgan.
+
+## Node.js variantini ishga tushirish
 
 Node.js 18 yoki undan yuqori versiyasi kerak.
 
@@ -92,7 +151,11 @@ Himoya qanday ishlaydi:
   xato kiritilsa, `429` javobi qaytariladi;
 - parol vaqt bo‘yicha barqaror (`timingSafeEqual`) usulda solishtiriladi.
 
-## Sozlamalar (muhit o‘zgaruvchilari)
+## Sozlamalar (Node.js varianti uchun muhit o‘zgaruvchilari)
+
+> PHP variantida xuddi shu sozlamalar `public/index.php` faylining boshidagi
+> «SOZLAMALAR» blokida turadi (`$ADMIN_PASSWORD`, `$PUBLIC_BASE_URL`,
+> `$MAX_UPLOAD_BYTES`, `$CHUNK_BYTES`).
 
 | O‘zgaruvchi         | Standart qiymat     | Vazifasi                                                        |
 | ------------------- | ------------------- | --------------------------------------------------------------- |
@@ -209,8 +272,10 @@ QR videoning `https://video.namangan.uz/v/<id>` sahifasini ochishi kerak.
 ## Loyiha tuzilishi
 
 ```
+public/index.php       PHP varianti: butun server mantiqi bitta faylda (hosting uchun)
+public/.htaccess       Apache sozlamasi (manzillarni index.php ga yo‘naltirish)
 oddiy.html             serversiz variant: bitta faylda butun sayt (QR generator ham ichida)
-server.js              HTTP server, yuklash va video oqimi (Range bilan)
+server.js              Node.js HTTP serveri, yuklash va video oqimi (Range bilan)
 lib/auth.js            administrator sessiyalari (imzolangan cookie, urinish chegarasi)
 lib/store.js           videos.json ustida atomik yozuv (JSON «ombor»)
 public/index.html      bosh sahifa: yuklash formasi + videolar ro‘yxati
@@ -229,7 +294,10 @@ data/                  yuklangan videolar va videos.json (git’ga kirmaydi)
 | Metod    | Manzil                     | Vazifasi                                                         |
 | -------- | -------------------------- | ---------------------------------------------------------------- |
 | `GET`    | `/api/videos`              | Barcha videolar ro‘yxati (JSON) — ochiq                          |
-| `POST`   | `/api/videos`              | 🔒 Video yuklash. Tanasi — fayl baytlari, `x-video-meta` sarlavhasida base64(JSON) ma’lumotlar |
+| `POST`   | `/api/videos`              | 🔒 Video yuklash (Node.js). Tanasi — fayl baytlari, `x-video-meta` sarlavhasida base64(JSON) ma’lumotlar |
+| `POST`   | `/api/uploads`             | 🔒 Bo‘laklab yuklashni boshlash (PHP) → `uploadId`               |
+| `PUT`    | `/api/uploads/:id?offset=` | 🔒 Navbatdagi bo‘lak (xom baytlar)                               |
+| `POST`   | `/api/uploads/:id/finish`  | 🔒 Yuklashni tugatish, ma’lumotlarni saqlash (JSON)              |
 | `GET`    | `/api/videos/:id`          | Bitta video ma’lumotlari — ochiq                                  |
 | `PATCH`  | `/api/videos/:id`          | 🔒 Nomi/tasnifini va boshqa maydonlarni tahrirlash (JSON)          |
 | `DELETE` | `/api/videos/:id`          | 🔒 Videoni va fayllarini o‘chirish                                 |
