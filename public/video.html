@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Video — Namangan turistik-rekreatsion hududlari</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+  <!-- SVG ikonkalar to‘plami (emoji fontlariga bog‘liq bo‘lmasligi uchun) -->
+  <svg class="sprite" aria-hidden="true" focusable="false">
+    <defs>
+      <symbol id="i-mountain" viewBox="0 0 24 24"><path d="M2 19l6.5-10 4 6 3-4.5L22 19H2z" fill="currentColor"/></symbol>
+      <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21.5S18.5 14.8 18.5 10a6.5 6.5 0 10-13 0c0 4.8 6.5 11.5 6.5 11.5z"/><circle cx="12" cy="10" r="2.3"/></symbol>
+      <symbol id="i-area" viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M4 9.5h3M4 14.5h3M9.5 20v-3M14.5 20v-3"/></symbol>
+      <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+      <symbol id="i-hash" viewBox="0 0 24 24"><path d="M9 4L7 20M17 4l-2 16M4 9h16M3 15h16"/></symbol>
+      <symbol id="i-link" viewBox="0 0 24 24"><path d="M9.5 14.5l5-5M10.5 7.5l1.2-1.2a4.2 4.2 0 016 6L16.5 13.5M13.5 16.5l-1.2 1.2a4.2 4.2 0 01-6-6L7.5 10.5"/></symbol>
+      <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11m0 0l-4-4m4 4l4-4M4.5 19.5h15"/></symbol>
+      <symbol id="i-print" viewBox="0 0 24 24"><path d="M7 8.5V4h10v4.5M5 8.5h14v7h-2.5M7 15.5H5M7 13h10v7H7z"/></symbol>
+      <symbol id="i-arrow-left" viewBox="0 0 24 24"><path d="M19 12H5m0 0l6-6m-6 6l6 6"/></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 13l4.5 4.5L19 7"/></symbol>
+    </defs>
+  </svg>
+
+  <header class="site-header">
+    <div class="wrap site-header__inner">
+      <span class="emblem" aria-hidden="true"><svg class="ico ico--lg"><use href="#i-mountain"></use></svg></span>
+      <div>
+        <div class="site-header__eyebrow">Video arxiv</div>
+        <h1>Yer maydonlari bo‘yicha video ma’lumotlar</h1>
+        <p class="site-header__legal">
+          «Наманган туристик-рекреацион ҳудудларини ривожлантириш дирекцияси»га доимий фойдаланиш
+          ҳуқуқи асосида бириктирилган ер майдонлари (ПҚ-220-сон қарор, 7-илова).
+        </p>
+      </div>
+      <nav class="site-header__nav">
+        <a class="btn btn--ghost" href="/"><svg class="ico"><use href="#i-arrow-left"></use></svg> Barcha videolar</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <a class="back-link" href="/"><svg class="ico"><use href="#i-arrow-left"></use></svg> Ro‘yxatga qaytish</a>
+
+    <div id="notice" class="notice">Video yuklanmoqda…</div>
+
+    <div class="player-layout" id="layout" hidden>
+      <!-- ----------------------------- Player ----------------------------- -->
+      <section class="card player-card">
+        <video id="player" controls preload="metadata" playsinline></video>
+        <div class="player-card__body">
+          <h2 class="player-card__title" id="video-title"></h2>
+          <div class="player-card__meta" id="video-chips"></div>
+          <p class="player-card__desc" id="video-description"></p>
+
+          <table class="details-table">
+            <tbody id="details"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ------------------------------ QR ------------------------------- -->
+      <aside class="card qr-card" id="qr">
+        <h3>QR-kod</h3>
+        <p class="muted">Telefon kamerasi bilan skaner qilib videoni bevosita ko‘rish mumkin.</p>
+        <div class="qr-frame"><canvas id="qr-canvas" aria-label="Videoga havola QR-kodi"></canvas></div>
+        <div class="qr-link" id="qr-link"></div>
+        <div class="qr-actions">
+          <button class="btn btn--outline btn--sm" type="button" id="copy-btn">
+            <svg class="ico"><use href="#i-link"></use></svg> Havolani nusxalash
+          </button>
+          <button class="btn btn--outline btn--sm" type="button" id="download-btn">
+            <svg class="ico"><use href="#i-download"></use></svg> QR-kodni yuklab olish (PNG)
+          </button>
+          <button class="btn btn--outline btn--sm" type="button" id="print-btn">
+            <svg class="ico"><use href="#i-print"></use></svg> QR-kodni chop etish
+          </button>
+        </div>
+        <div class="status" id="qr-status" role="status" aria-live="polite"></div>
+      </aside>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap site-footer__inner">
+      <span>«Наманган туристик-рекреацион ҳудудларини ривожлантириш дирекцияси» — video arxiv</span>
+      <span id="footer-id"></span>
+    </div>
+  </footer>
+
+  <script type="module" src="/js/video.js"></script>
+</body>
+</html>
