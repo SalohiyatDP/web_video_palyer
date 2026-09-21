@@ -1,0 +1,1441 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Yer maydonlari video arxivi — oddiy (serversiz) variant</title>
+<meta name="description" content="ПҚ-220-сон қарорининг 7-иловасига мувофиқ «Наманган туристик-рекреацион ҳудудларини ривожлантириш дирекцияси»га бириктирилган ер майдонлари видеолari." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230f5741'/%3E%3Cpath d='M4 24l7.5-11 4.5 6.5L19.5 15 28 24H4z' fill='%23f2b33d'/%3E%3Ccircle cx='23' cy='9' r='3' fill='%23fff' opacity='.9'/%3E%3C/svg%3E" />
+<style>
+/* ==================================================================
+   Yer maydonlari video arxivi — bitta faylli (serversiz) variant
+   ================================================================== */
+:root {
+  --green-900:#072b21; --green-800:#0b3d2e; --green-700:#0f5741; --green-600:#14785b;
+  --green-500:#1c9a74; --green-100:#e3f5ee; --sand:#f2b33d;
+  --ink:#12211d; --ink-soft:#4d635c; --line:#dbe7e2; --bg:#f5f8f6; --card:#fff;
+  --danger:#b3261e; --warn-bg:#fff6e2; --warn-line:#f0d49a;
+  --radius:14px; --shadow-sm:0 1px 2px rgba(7,43,33,.06),0 2px 8px rgba(7,43,33,.05);
+  --shadow-md:0 6px 24px rgba(7,43,33,.1);
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Segoe UI",system-ui,-apple-system,"Noto Sans",Roboto,Arial,sans-serif;
+  color:var(--ink);background:var(--bg);line-height:1.55;-webkit-font-smoothing:antialiased}
+h1,h2,h3{line-height:1.25;margin:0}
+a{color:var(--green-600)}
+.wrap{width:min(1180px,100% - 40px);margin-inline:auto}
+.muted{color:var(--ink-soft)}
+
+/* ikonkalar */
+.sprite{display:none}
+.ico{width:1.15em;height:1.15em;flex:none;vertical-align:-.2em;fill:none;stroke:currentColor;
+  stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.ico--lg{width:1.7em;height:1.7em}
+.ico--xl{width:32px;height:32px;stroke-width:1.5}
+
+/* shapka */
+.site-header{background:linear-gradient(135deg,var(--green-900),var(--green-700) 55%,var(--green-600));
+  color:#fff;padding:26px 0 30px;border-bottom:4px solid var(--sand)}
+.site-header__inner{display:flex;gap:18px;align-items:flex-start}
+.emblem{flex:none;width:52px;height:52px;border-radius:12px;background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.25);display:grid;place-items:center}
+.site-header__eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--sand);
+  font-weight:700;margin-bottom:4px}
+.site-header h1{font-size:clamp(20px,3vw,28px);font-weight:700}
+.site-header__legal{margin:10px 0 0;max-width:78ch;font-size:13.5px;color:rgba(255,255,255,.84)}
+.badge{display:inline-block;margin-top:10px;padding:3px 10px;border-radius:99px;font-size:12px;
+  font-weight:700;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.3)}
+
+/* tugmalar */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 18px;
+  border-radius:10px;border:1px solid transparent;background:var(--green-600);color:#fff;font:inherit;
+  font-weight:600;font-size:14.5px;cursor:pointer;text-decoration:none;transition:background .15s,transform .05s}
+.btn:hover{background:var(--green-700)}
+.btn:active{transform:translateY(1px)}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.btn--outline{background:#fff;border-color:var(--line);color:var(--green-700)}
+.btn--outline:hover{background:var(--green-100)}
+.btn--danger{background:transparent;color:var(--danger);border-color:#f0cfcd}
+.btn--danger:hover{background:#fdeceb}
+.btn--sm{padding:7px 12px;font-size:13px}
+.btn--icon{padding:7px 9px;margin-left:auto}
+
+/* kartalar va bo'limlar */
+main{padding:28px 0 60px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-sm)}
+.section-title{display:flex;align-items:baseline;gap:12px;margin:34px 0 14px}
+.section-title h2{font-size:19px}
+.section-title .muted{font-size:14px}
+
+.banner{display:none;gap:10px;align-items:flex-start;margin-bottom:18px;padding:14px 16px;
+  border-radius:12px;background:var(--warn-bg);border:1px solid var(--warn-line);font-size:14px}
+.banner.is-visible{display:flex}
+.banner strong{display:block;margin-bottom:2px}
+
+/* forma */
+.uploader{padding:22px}
+.uploader__head{margin-bottom:16px}
+.uploader__head h2{font-size:19px}
+.uploader__head p{margin:4px 0 0;font-size:14px;color:var(--ink-soft)}
+.form-grid{display:grid;grid-template-columns:minmax(260px,340px) 1fr;gap:20px}
+.dropzone{border:2px dashed var(--line);border-radius:12px;background:#fbfdfc;padding:22px 18px;
+  text-align:center;cursor:pointer;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:8px;min-height:188px;transition:border-color .15s,background .15s}
+.dropzone:hover,.dropzone.is-over{border-color:var(--green-500);background:var(--green-100)}
+.dropzone__placeholder{display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--green-700)}
+.dropzone__title{font-weight:600;color:var(--ink)}
+.dropzone__hint{display:block;font-size:12.5px;color:var(--ink-soft);font-weight:400}
+.dropzone input[type=file]{display:none}
+.dropzone.has-file{border-style:solid;border-color:var(--green-500);background:#fff}
+.file-preview{display:none;width:100%}
+.dropzone.has-file .file-preview{display:block}
+.dropzone.has-file .dropzone__placeholder{display:none}
+.file-preview video{width:100%;max-height:122px;border-radius:8px;background:#000;object-fit:contain}
+.file-preview__name{display:block;margin-top:8px;font-size:13px;font-weight:600;word-break:break-all}
+.file-preview__meta{display:block;font-size:12px;color:var(--ink-soft)}
+.fields{display:grid;gap:14px}
+.fields__row{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px}
+label{display:block;font-size:13px;font-weight:600;margin-bottom:5px}
+label .req{color:var(--danger)}
+input[type=text],input[type=url],input[type=search],textarea{width:100%;padding:10px 12px;
+  border:1px solid var(--line);border-radius:10px;font:inherit;font-size:14.5px;background:#fff;color:var(--ink)}
+input:focus,textarea:focus{outline:2px solid rgba(28,154,116,.35);outline-offset:1px;border-color:var(--green-500)}
+textarea{min-height:92px;resize:vertical}
+.form-actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:6px}
+.status{font-size:13.5px}
+.status--error{color:var(--danger)}
+.status--ok{color:var(--green-600)}
+
+/* ro'yxat */
+.toolbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+.toolbar input[type=search]{max-width:340px}
+.video-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(268px,1fr));gap:18px}
+.video-card{display:flex;flex-direction:column;overflow:hidden;background:var(--card);
+  border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-sm);
+  transition:box-shadow .18s,transform .18s}
+.video-card:hover{box-shadow:var(--shadow-md);transform:translateY(-2px)}
+.video-card__thumb{position:relative;display:block;aspect-ratio:16/9;cursor:pointer;border:0;padding:0;
+  width:100%;background:linear-gradient(135deg,var(--green-800),var(--green-600));overflow:hidden}
+.video-card__thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.video-card__play{position:absolute;inset:0;display:grid;place-items:center;color:#fff;
+  background:rgba(7,43,33,.18);transition:background .15s}
+.video-card__thumb:hover .video-card__play{background:rgba(7,43,33,.34)}
+.video-card__play .ico{width:46px;height:46px;stroke-width:1.3;filter:drop-shadow(0 2px 6px rgba(0,0,0,.4))}
+.video-card__duration{position:absolute;right:8px;bottom:8px;background:rgba(0,0,0,.72);color:#fff;
+  font-size:12px;font-weight:600;padding:2px 7px;border-radius:6px}
+.video-card__body{padding:14px 16px 16px;display:flex;flex-direction:column;gap:8px;flex:1}
+.video-card__title{font-size:16px;font-weight:700}
+.video-card__desc{font-size:13.5px;color:var(--ink-soft);display:-webkit-box;-webkit-line-clamp:3;
+  -webkit-box-orient:vertical;overflow:hidden}
+.video-card__tags{display:flex;flex-wrap:wrap;gap:6px}
+.video-card__actions{display:flex;gap:8px;margin-top:auto;padding-top:6px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:5px;background:var(--green-100);color:var(--green-700);
+  border-radius:99px;padding:3px 10px;font-size:12px;font-weight:600}
+.chip--plain{background:#f1f4f3;color:var(--ink-soft)}
+.empty[hidden]{display:none}
+.empty{padding:46px 20px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;
+  color:var(--ink-soft);border:1px dashed var(--line);border-radius:var(--radius);background:#fff}
+
+/* ko'rish paneli */
+.viewer[hidden]{display:none}
+.viewer{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:22px;align-items:start;margin-bottom:10px}
+.player-card{overflow:hidden}
+.player-card video{width:100%;max-height:66vh;display:block;background:#000}
+.player-card__body{padding:18px 20px 22px}
+.player-card__title{font-size:22px;font-weight:700;margin-bottom:6px}
+.player-card__meta{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.player-card__desc{white-space:pre-wrap;font-size:15px}
+.details-table{width:100%;border-collapse:collapse;margin-top:18px;font-size:14px}
+.details-table th,.details-table td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+.details-table th{width:42%;color:var(--ink-soft);font-weight:600}
+.player-card__actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.qr-card{padding:18px;text-align:center;position:sticky;top:18px}
+.qr-card h3{font-size:16px;margin-bottom:4px}
+.qr-card p.muted{font-size:13px;margin:0 0 14px}
+.qr-frame{display:inline-block;padding:10px;border:1px solid var(--line);border-radius:12px;background:#fff}
+.qr-frame canvas{display:block}
+.qr-empty{font-size:13px;color:var(--ink-soft);padding:16px 10px;border:1px dashed var(--line);border-radius:12px}
+.qr-link-field{margin-top:12px;text-align:left}
+.qr-link-field label{font-size:12px}
+.qr-link-field input{font-size:12.5px;padding:8px 10px}
+.qr-actions{display:grid;gap:8px;margin-top:12px}
+
+/* futer */
+.site-footer{border-top:1px solid var(--line);background:#fff;padding:20px 0;font-size:13px;color:var(--ink-soft)}
+.site-footer__inner{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+
+@media (max-width:900px){
+  .form-grid{grid-template-columns:1fr}
+  .viewer{grid-template-columns:1fr}
+  .qr-card{position:static}
+  .site-header__inner{flex-wrap:wrap}
+}
+@media print{
+  .site-header,.site-footer,.uploader,.video-grid,.toolbar,.section-title,.player-card,.qr-actions,
+  .qr-link-field,.banner{display:none!important}
+  .viewer{display:block}
+  .qr-card{border:none;box-shadow:none}
+  body{background:#fff}
+}
+</style>
+</head>
+<body>
+<!-- SVG ikonkalar (emoji fontlariga bog'liq bo'lmasligi uchun) -->
+<svg class="sprite" aria-hidden="true" focusable="false"><defs>
+  <symbol id="i-mountain" viewBox="0 0 24 24"><path d="M2 19l6.5-10 4 6 3-4.5L22 19H2z" fill="currentColor"/></symbol>
+  <symbol id="i-video" viewBox="0 0 24 24"><path d="M3 6.5h12.5v11H3zM15.5 10.5l5.5-3.2v9.4l-5.5-3.2z"/></symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4m0 0L8 8m4-4l4 4M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5l12 7-12 7V5z" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-play-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M10 8.5l6 3.5-6 3.5V8.5z" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-qr" viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h2.5v2.5H14zM17.5 17.5H20V20h-2.5zM14 20h2.5M20 14v2.5"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 7V4.5h4V7M6.5 7l1 12.5h9L17.5 7M10.5 11v5M13.5 11v5"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.4-4.4"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21.5S18.5 14.8 18.5 10a6.5 6.5 0 10-13 0c0 4.8 6.5 11.5 6.5 11.5z"/><circle cx="12" cy="10" r="2.3"/></symbol>
+  <symbol id="i-area" viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M4 9.5h3M4 14.5h3M9.5 20v-3M14.5 20v-3"/></symbol>
+  <symbol id="i-hash" viewBox="0 0 24 24"><path d="M9 4L7 20M17 4l-2 16M4 9h16M3 15h16"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+  <symbol id="i-link" viewBox="0 0 24 24"><path d="M9.5 14.5l5-5M10.5 7.5l1.2-1.2a4.2 4.2 0 016 6L16.5 13.5M13.5 16.5l-1.2 1.2a4.2 4.2 0 01-6-6L7.5 10.5"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11m0 0l-4-4m4 4l4-4M4.5 19.5h15"/></symbol>
+  <symbol id="i-print" viewBox="0 0 24 24"><path d="M7 8.5V4h10v4.5M5 8.5h14v7h-2.5M7 15.5H5M7 13h10v7H7z"/></symbol>
+  <symbol id="i-box" viewBox="0 0 24 24"><path d="M3 8l9-4 9 4v8l-9 4-9-4V8z"/><path d="M3 8l9 4 9-4M12 12v8"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 13l4.5 4.5L19 7"/></symbol>
+  <symbol id="i-warn" viewBox="0 0 24 24"><path d="M12 4l9 16H3l9-16z"/><path d="M12 10v4.5M12 17.2v.3"/></symbol>
+</defs></svg>
+
+<header class="site-header">
+  <div class="wrap site-header__inner">
+    <span class="emblem" aria-hidden="true"><svg class="ico ico--lg"><use href="#i-mountain"></use></svg></span>
+    <div>
+      <div class="site-header__eyebrow">Video arxiv</div>
+      <h1>Yer maydonlari bo‘yicha video ma’lumotlar</h1>
+      <p class="site-header__legal">
+        Ўзбекистон Республикаси Президентининг 2026 йил 11 июндаги ПҚ-220-сон қарорининг
+        7-иловасига мувофиқ «Наманган туристик-рекреацион ҳудудларини ривожлантириш дирекцияси»га
+        доимий фойдаланиш ҳуқуқи асосида бириктирилган ер майдонлари ҳақида тайёрланган видеолар.
+      </p>
+      <span class="badge">Oddiy variant — bitta HTML fayl, server kerak emas</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="banner" id="banner">
+    <svg class="ico ico--lg" aria-hidden="true"><use href="#i-warn"></use></svg>
+    <div><strong id="banner-title">Eslatma</strong><span id="banner-text"></span></div>
+  </div>
+
+  <!-- ------------------------- Ko‘rish paneli ------------------------- -->
+  <section class="viewer" id="viewer" hidden>
+    <div class="card player-card">
+      <video id="player" controls playsinline preload="metadata"></video>
+      <div class="player-card__body">
+        <h2 class="player-card__title" id="v-title"></h2>
+        <div class="player-card__meta" id="v-chips"></div>
+        <p class="player-card__desc" id="v-desc"></p>
+        <table class="details-table"><tbody id="v-details"></tbody></table>
+        <div class="player-card__actions">
+          <button class="btn btn--outline btn--sm" type="button" id="v-save">
+            <svg class="ico"><use href="#i-download"></use></svg> Video faylni yuklab olish
+          </button>
+          <button class="btn btn--outline btn--sm" type="button" id="v-close">
+            <svg class="ico"><use href="#i-close"></use></svg> Yopish
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <aside class="card qr-card">
+      <h3>QR-kod</h3>
+      <p class="muted">Telefon kamerasi bilan skaner qilib videoni ochish uchun.</p>
+      <div id="qr-holder"><div class="qr-frame"><canvas id="qr-canvas" aria-label="Videoga havola QR-kodi"></canvas></div></div>
+      <div class="qr-link-field">
+        <label for="qr-link">QR-kodga yozilgan havola</label>
+        <input type="url" id="qr-link" placeholder="https://…" />
+      </div>
+      <div class="qr-actions">
+        <button class="btn btn--outline btn--sm" type="button" id="qr-refresh">
+          <svg class="ico"><use href="#i-qr"></use></svg> QR-kodni yangilash
+        </button>
+        <button class="btn btn--outline btn--sm" type="button" id="qr-copy">
+          <svg class="ico"><use href="#i-link"></use></svg> Havolani nusxalash
+        </button>
+        <button class="btn btn--outline btn--sm" type="button" id="qr-download">
+          <svg class="ico"><use href="#i-download"></use></svg> QR-kodni PNG qilib olish
+        </button>
+        <button class="btn btn--outline btn--sm" type="button" id="qr-print">
+          <svg class="ico"><use href="#i-print"></use></svg> QR-kodni chop etish
+        </button>
+      </div>
+      <div class="status" id="qr-status" role="status" aria-live="polite"></div>
+    </aside>
+  </section>
+
+  <!-- ------------------------- Yuklash formasi ------------------------ -->
+  <section class="card uploader" id="yuklash">
+    <div class="uploader__head">
+      <h2>Yangi video qo‘shish</h2>
+      <p>Videoni tanlang, nomi va tasnifini kiriting. Video shu brauzer xotirasida saqlanadi va unga QR-kod yaratiladi.</p>
+    </div>
+
+    <form id="form" class="form-grid" novalidate>
+      <label class="dropzone" id="dropzone" for="file">
+        <input type="file" id="file" accept="video/*" />
+        <span class="dropzone__placeholder">
+          <svg class="ico ico--xl" aria-hidden="true"><use href="#i-video"></use></svg>
+          <span class="dropzone__title">Video faylni tanlang</span>
+          <span class="dropzone__hint">yoki faylni shu yerga tashlang<br />MP4, WebM, MOV — brauzer xotirasi imkoni doirasida</span>
+        </span>
+        <span class="file-preview">
+          <video id="preview" muted playsinline preload="metadata"></video>
+          <span class="file-preview__name" id="preview-name"></span>
+          <span class="file-preview__meta" id="preview-meta"></span>
+          <span class="dropzone__hint">Boshqa fayl tanlash uchun bosing</span>
+        </span>
+      </label>
+
+      <div class="fields">
+        <div>
+          <label for="title">Video nomi <span class="req">*</span></label>
+          <input type="text" id="title" maxlength="200" placeholder="Masalan: Chortoq tumani, 12-kontur yer maydoni" />
+        </div>
+        <div>
+          <label for="desc">Video tasnifi (izoh)</label>
+          <textarea id="desc" maxlength="4000" placeholder="Yer maydonining joylashuvi, maqsadli foydalanish turi, infratuzilma holati…"></textarea>
+        </div>
+        <div class="fields__row">
+          <div>
+            <label for="district">Tuman / shahar</label>
+            <input type="text" id="district" list="districts" maxlength="120" placeholder="Chortoq tumani" />
+            <datalist id="districts">
+              <option value="Namangan shahri"></option><option value="Namangan tumani"></option>
+              <option value="Chortoq tumani"></option><option value="Chust tumani"></option>
+              <option value="Kosonsoy tumani"></option><option value="Mingbuloq tumani"></option>
+              <option value="Norin tumani"></option><option value="Pop tumani"></option>
+              <option value="To‘raqo‘rg‘on tumani"></option><option value="Uchqo‘rg‘on tumani"></option>
+              <option value="Uychi tumani"></option><option value="Yangiqo‘rg‘on tumani"></option>
+            </datalist>
+          </div>
+          <div><label for="area">Maydoni (gektar)</label><input type="text" id="area" maxlength="60" placeholder="4,5 ga" /></div>
+          <div><label for="cadastre">Kadastr raqami</label><input type="text" id="cadastre" maxlength="120" placeholder="06:12:03:01:05:0123" /></div>
+          <div><label for="location">Joylashuvi / koordinata</label><input type="text" id="location" maxlength="200" placeholder="41.0561, 71.0827" /></div>
+        </div>
+        <div>
+          <label for="external">QR-kod uchun tashqi havola (ixtiyoriy)</label>
+          <input type="url" id="external" maxlength="600" placeholder="https://… — video internetda joylangan bo‘lsa, shu havola QR-kodga yoziladi" />
+        </div>
+        <div class="form-actions">
+          <button class="btn" type="submit" id="submit">
+            <svg class="ico"><use href="#i-upload"></use></svg> Saqlash va QR yaratish
+          </button>
+          <button class="btn btn--outline" type="button" id="clear">Tozalash</button>
+          <div class="status" id="status" role="status" aria-live="polite"></div>
+        </div>
+      </div>
+    </form>
+  </section>
+
+  <!-- ------------------------- Videolar ro‘yxati ---------------------- -->
+  <div class="section-title">
+    <h2>Saqlangan videolar</h2><span class="muted" id="count"></span>
+  </div>
+  <div class="toolbar">
+    <input type="search" id="search" placeholder="Nomi, tumani yoki kadastr raqami bo‘yicha qidirish…" />
+  </div>
+  <div class="video-grid" id="grid"></div>
+  <div class="empty" id="empty" hidden>
+    <svg class="ico ico--xl" aria-hidden="true"><use href="#i-box"></use></svg>
+    <span>Hozircha video qo‘shilmagan. Yuqoridagi forma orqali birinchi videoni qo‘shing.</span>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap site-footer__inner">
+    <span>«Наманган туристик-рекреацион ҳудудларини ривожлантириш дирекцияси» — video arxiv</span>
+    <span id="storage-info"></span>
+  </div>
+</footer>
+
+<script>
+"use strict";
+/* ==================================================================
+   1-QISM. QR-kod generatori (ISO/IEC 18004, bayt rejimi, M darajasi)
+   Bu qism public/js/qr.js fayli bilan bir xil.
+   ================================================================== */
+const QR = (function () {
+  /**
+   * Minimal, dependency-free QR Code generator (ISO/IEC 18004).
+   *
+   * Scope: byte mode (UTF-8), error correction level M, versions 1..20
+   * (up to 666 bytes of payload) - more than enough for URLs.
+   *
+   * Public API:
+   *   encode(text)                  -> { version, mask, size, modules }
+   *   drawOnCanvas(canvas, text, o) -> { version, mask, size, pixelSize }
+   */
+
+  /* ------------------------------------------------------------------ *
+   * Galois field GF(256) arithmetic, primitive polynomial 0x11D
+   * ------------------------------------------------------------------ */
+  const GF_EXP = new Uint8Array(512);
+  const GF_LOG = new Uint8Array(256);
+
+  (function initGaloisTables() {
+    let x = 1;
+    for (let i = 0; i < 255; i++) {
+      GF_EXP[i] = x;
+      GF_LOG[x] = i;
+      x <<= 1;
+      if (x & 0x100) x ^= 0x11d;
+    }
+    for (let i = 255; i < 512; i++) GF_EXP[i] = GF_EXP[i - 255];
+  })();
+
+  function gfMul(a, b) {
+    if (a === 0 || b === 0) return 0;
+    return GF_EXP[GF_LOG[a] + GF_LOG[b]];
+  }
+
+  /** Generator polynomial for `degree` error correction codewords. */
+  function rsGeneratorPoly(degree) {
+    let poly = [1];
+    for (let i = 0; i < degree; i++) {
+      const next = new Array(poly.length + 1).fill(0);
+      for (let j = 0; j < poly.length; j++) {
+        next[j] ^= poly[j];
+        next[j + 1] ^= gfMul(poly[j], GF_EXP[i]);
+      }
+      poly = next;
+    }
+    return poly;
+  }
+
+  /** Reed-Solomon error correction codewords for one block. */
+  function rsEncode(data, ecLength) {
+    const gen = rsGeneratorPoly(ecLength);
+    const buffer = new Uint8Array(data.length + ecLength);
+    buffer.set(data, 0);
+    for (let i = 0; i < data.length; i++) {
+      const factor = buffer[i];
+      if (factor === 0) continue;
+      for (let j = 1; j < gen.length; j++) {
+        buffer[i + j] ^= gfMul(gen[j], factor);
+      }
+    }
+    return buffer.subarray(data.length);
+  }
+
+  /* ------------------------------------------------------------------ *
+   * Version tables (error correction level M only)
+   *   version: [ecCodewordsPerBlock, [[blockCount, dataCodewords], ...]]
+   * ------------------------------------------------------------------ */
+  const EC_BLOCKS_M = {
+    1: [10, [[1, 16]]],
+    2: [16, [[1, 28]]],
+    3: [26, [[1, 44]]],
+    4: [18, [[2, 32]]],
+    5: [24, [[2, 43]]],
+    6: [16, [[4, 27]]],
+    7: [18, [[4, 31]]],
+    8: [22, [[2, 38], [2, 39]]],
+    9: [22, [[3, 36], [2, 37]]],
+    10: [26, [[4, 43], [1, 44]]],
+    11: [30, [[1, 50], [4, 51]]],
+    12: [22, [[6, 36], [2, 37]]],
+    13: [22, [[8, 37], [1, 38]]],
+    14: [24, [[4, 40], [5, 41]]],
+    15: [24, [[5, 41], [5, 42]]],
+    16: [28, [[7, 45], [3, 46]]],
+    17: [28, [[10, 46], [1, 47]]],
+    18: [26, [[9, 43], [4, 44]]],
+    19: [26, [[3, 44], [11, 45]]],
+    20: [26, [[3, 41], [13, 42]]],
+  };
+
+  const MIN_VERSION = 1;
+  const MAX_VERSION = 20;
+
+  /** Alignment pattern centre coordinates per version. */
+  const ALIGNMENT_CENTERS = {
+    1: [],
+    2: [6, 18],
+    3: [6, 22],
+    4: [6, 26],
+    5: [6, 30],
+    6: [6, 34],
+    7: [6, 22, 38],
+    8: [6, 24, 42],
+    9: [6, 26, 46],
+    10: [6, 28, 50],
+    11: [6, 30, 54],
+    12: [6, 32, 58],
+    13: [6, 34, 62],
+    14: [6, 26, 46, 66],
+    15: [6, 26, 48, 70],
+    16: [6, 26, 50, 74],
+    17: [6, 30, 54, 78],
+    18: [6, 30, 56, 82],
+    19: [6, 30, 58, 86],
+    20: [6, 34, 62, 90],
+  };
+
+  const MODE_BYTE = 0b0100;
+  /** Error correction level M is encoded as `00` in the format information. */
+  const EC_LEVEL_BITS_M = 0b00;
+
+  const G15 = 0b101_0011_0111; // x^10 + x^8 + x^5 + x^4 + x^2 + x + 1
+  const G15_MASK = 0b101_0100_0001_0010;
+  const G18 = 0b1_1111_0010_0101; // x^12 + x^11 + x^10 + x^9 + x^8 + x^5 + x^2 + 1
+
+  function bitLength(value) {
+    let length = 0;
+    while (value !== 0) {
+      length++;
+      value >>>= 1;
+    }
+    return length;
+  }
+
+  /** 15 bit BCH-encoded format information (EC level + mask pattern). */
+  function formatInformation(maskPattern) {
+    const data = (EC_LEVEL_BITS_M << 3) | maskPattern;
+    let remainder = data << 10;
+    while (bitLength(remainder) - bitLength(G15) >= 0) {
+      remainder ^= G15 << (bitLength(remainder) - bitLength(G15));
+    }
+    return ((data << 10) | remainder) ^ G15_MASK;
+  }
+
+  /** 18 bit BCH-encoded version information (versions 7 and above). */
+  function versionInformation(version) {
+    let remainder = version << 12;
+    while (bitLength(remainder) - bitLength(G18) >= 0) {
+      remainder ^= G18 << (bitLength(remainder) - bitLength(G18));
+    }
+    return (version << 12) | remainder;
+  }
+
+  /* ------------------------------------------------------------------ *
+   * Data encoding
+   * ------------------------------------------------------------------ */
+  function charCountBits(version) {
+    return version < 10 ? 8 : 16;
+  }
+
+  function totalDataCodewords(version) {
+    const [, groups] = EC_BLOCKS_M[version];
+    return groups.reduce((sum, [count, dataCw]) => sum + count * dataCw, 0);
+  }
+
+  function pickVersion(byteLength) {
+    for (let version = MIN_VERSION; version <= MAX_VERSION; version++) {
+      const requiredBits = 4 + charCountBits(version) + byteLength * 8;
+      if (requiredBits <= totalDataCodewords(version) * 8) return version;
+    }
+    throw new Error(
+      `QR: ma'lumot juda uzun (${byteLength} bayt), maksimal hajm ${totalDataCodewords(MAX_VERSION)} bayt atrofida`
+    );
+  }
+
+  class BitWriter {
+    constructor() {
+      this.bits = [];
+    }
+
+    put(value, length) {
+      for (let i = length - 1; i >= 0; i--) this.bits.push((value >>> i) & 1);
+    }
+
+    get length() {
+      return this.bits.length;
+    }
+  }
+
+  function toUtf8Bytes(text) {
+    if (typeof TextEncoder !== 'undefined') return new TextEncoder().encode(text);
+    return Uint8Array.from(Buffer.from(text, 'utf8'));
+  }
+
+  /** Builds the final (interleaved) codeword stream for the given text. */
+  function buildCodewords(text) {
+    const bytes = toUtf8Bytes(text);
+    const version = pickVersion(bytes.length);
+    const [ecPerBlock, groups] = EC_BLOCKS_M[version];
+    const dataCodewordCount = totalDataCodewords(version);
+    const capacityBits = dataCodewordCount * 8;
+
+    const writer = new BitWriter();
+    writer.put(MODE_BYTE, 4);
+    writer.put(bytes.length, charCountBits(version));
+    for (const byte of bytes) writer.put(byte, 8);
+
+    // Terminator (up to four zero bits) and padding to a byte boundary.
+    for (let i = 0; i < 4 && writer.length < capacityBits; i++) writer.put(0, 1);
+    while (writer.length % 8 !== 0) writer.put(0, 1);
+
+    const dataCodewords = new Uint8Array(dataCodewordCount);
+    for (let i = 0; i < writer.length; i += 8) {
+      let byte = 0;
+      for (let b = 0; b < 8; b++) byte = (byte << 1) | writer.bits[i + b];
+      dataCodewords[i / 8] = byte;
+    }
+    // Pad codewords 0xEC / 0x11 alternating.
+    const PAD = [0xec, 0x11];
+    for (let i = writer.length / 8, p = 0; i < dataCodewordCount; i++, p++) {
+      dataCodewords[i] = PAD[p % 2];
+    }
+
+    // Split into blocks, compute error correction per block.
+    const dataBlocks = [];
+    const ecBlocks = [];
+    let offset = 0;
+    for (const [blockCount, blockDataCw] of groups) {
+      for (let i = 0; i < blockCount; i++) {
+        const block = dataCodewords.subarray(offset, offset + blockDataCw);
+        offset += blockDataCw;
+        dataBlocks.push(block);
+        ecBlocks.push(rsEncode(block, ecPerBlock));
+      }
+    }
+
+    // Interleave data codewords, then error correction codewords.
+    const result = new Uint8Array(dataCodewordCount + ecPerBlock * dataBlocks.length);
+    let index = 0;
+    const maxDataLength = Math.max(...dataBlocks.map((b) => b.length));
+    for (let i = 0; i < maxDataLength; i++) {
+      for (const block of dataBlocks) {
+        if (i < block.length) result[index++] = block[i];
+      }
+    }
+    for (let i = 0; i < ecPerBlock; i++) {
+      for (const block of ecBlocks) result[index++] = block[i];
+    }
+
+    return { version, codewords: result };
+  }
+
+  /* ------------------------------------------------------------------ *
+   * Matrix construction
+   * ------------------------------------------------------------------ */
+  function maskBit(pattern, row, col) {
+    switch (pattern) {
+      case 0: return (row + col) % 2 === 0;
+      case 1: return row % 2 === 0;
+      case 2: return col % 3 === 0;
+      case 3: return (row + col) % 3 === 0;
+      case 4: return (Math.floor(row / 2) + Math.floor(col / 3)) % 2 === 0;
+      case 5: return ((row * col) % 2) + ((row * col) % 3) === 0;
+      case 6: return (((row * col) % 2) + ((row * col) % 3)) % 2 === 0;
+      case 7: return (((row + col) % 2) + ((row * col) % 3)) % 2 === 0;
+      default: throw new Error(`QR: noto'g'ri mask: ${pattern}`);
+    }
+  }
+
+  function emptyMatrix(size) {
+    const matrix = new Array(size);
+    for (let r = 0; r < size; r++) matrix[r] = new Array(size).fill(null);
+    return matrix;
+  }
+
+  function placeFinderPatterns(matrix, size) {
+    const origins = [[0, 0], [0, size - 7], [size - 7, 0]];
+    for (const [top, left] of origins) {
+      for (let r = -1; r <= 7; r++) {
+        for (let c = -1; c <= 7; c++) {
+          const row = top + r;
+          const col = left + c;
+          if (row < 0 || col < 0 || row >= size || col >= size) continue;
+          const onRing = (r === 0 || r === 6) && c >= 0 && c <= 6;
+          const onSide = (c === 0 || c === 6) && r >= 0 && r <= 6;
+          const inCore = r >= 2 && r <= 4 && c >= 2 && c <= 4;
+          matrix[row][col] = onRing || onSide || inCore;
+        }
+      }
+    }
+  }
+
+  function placeTimingPatterns(matrix, size) {
+    for (let i = 8; i < size - 8; i++) {
+      const dark = i % 2 === 0;
+      if (matrix[6][i] === null) matrix[6][i] = dark;
+      if (matrix[i][6] === null) matrix[i][6] = dark;
+    }
+  }
+
+  function placeAlignmentPatterns(matrix, version, size) {
+    const centers = ALIGNMENT_CENTERS[version];
+    for (const centerRow of centers) {
+      for (const centerCol of centers) {
+        // Skip the three positions that collide with the finder patterns.
+        const nearTopLeft = centerRow === 6 && centerCol === 6;
+        const nearTopRight = centerRow === 6 && centerCol === size - 7;
+        const nearBottomLeft = centerRow === size - 7 && centerCol === 6;
+        if (nearTopLeft || nearTopRight || nearBottomLeft) continue;
+        for (let r = -2; r <= 2; r++) {
+          for (let c = -2; c <= 2; c++) {
+            const ring = Math.max(Math.abs(r), Math.abs(c));
+            matrix[centerRow + r][centerCol + c] = ring !== 1;
+          }
+        }
+      }
+    }
+  }
+
+  function reserveFormatAreas(matrix, version, size) {
+    for (let i = 0; i < 9; i++) {
+      if (matrix[8][i] === null) matrix[8][i] = false;
+      if (matrix[i][8] === null) matrix[i][8] = false;
+    }
+    for (let i = 0; i < 8; i++) {
+      if (matrix[8][size - 1 - i] === null) matrix[8][size - 1 - i] = false;
+      if (matrix[size - 1 - i][8] === null) matrix[size - 1 - i][8] = false;
+    }
+    matrix[size - 8][8] = true; // dark module
+    if (version >= 7) {
+      for (let i = 0; i < 18; i++) {
+        const a = Math.floor(i / 3);
+        const b = (i % 3) + size - 11;
+        if (matrix[a][b] === null) matrix[a][b] = false;
+        if (matrix[b][a] === null) matrix[b][a] = false;
+      }
+    }
+  }
+
+  function writeFormatInformation(matrix, size, maskPattern) {
+    const bits = formatInformation(maskPattern);
+    for (let i = 0; i < 15; i++) {
+      const dark = ((bits >> i) & 1) === 1;
+      let row;
+      if (i < 6) row = i;
+      else if (i < 8) row = i + 1;
+      else row = size - 15 + i;
+      matrix[row][8] = dark;
+
+      let col;
+      if (i < 8) col = size - 1 - i;
+      else if (i < 9) col = 7;
+      else col = 14 - i;
+      matrix[8][col] = dark;
+    }
+    matrix[size - 8][8] = true;
+  }
+
+  function writeVersionInformation(matrix, version, size) {
+    if (version < 7) return;
+    const bits = versionInformation(version);
+    for (let i = 0; i < 18; i++) {
+      const dark = ((bits >> i) & 1) === 1;
+      const a = Math.floor(i / 3);
+      const b = (i % 3) + size - 11;
+      matrix[a][b] = dark;
+      matrix[b][a] = dark;
+    }
+  }
+
+  /** Zig-zag placement of the codeword bits, applying the mask on the fly. */
+  function placeData(matrix, size, codewords, maskPattern) {
+    let bitIndex = 0;
+    const totalBits = codewords.length * 8;
+    const nextBit = () => {
+      if (bitIndex >= totalBits) return false; // remainder bits are zero
+      const byte = codewords[bitIndex >> 3];
+      const bit = (byte >> (7 - (bitIndex & 7))) & 1;
+      bitIndex++;
+      return bit === 1;
+    };
+
+    let row = size - 1;
+    let upward = true;
+    for (let col = size - 1; col > 0; col -= 2) {
+      if (col === 6) col--; // skip the vertical timing pattern
+      for (;;) {
+        for (let c = 0; c < 2; c++) {
+          const targetCol = col - c;
+          if (matrix[row][targetCol] !== null) continue;
+          let dark = nextBit();
+          if (maskBit(maskPattern, row, targetCol)) dark = !dark;
+          matrix[row][targetCol] = dark;
+        }
+        row += upward ? -1 : 1;
+        if (row < 0 || row >= size) {
+          row -= upward ? -1 : 1;
+          upward = !upward;
+          break;
+        }
+      }
+    }
+  }
+
+  /* ------------------------------------------------------------------ *
+   * Mask selection (penalty rules 1-4 of the specification)
+   * ------------------------------------------------------------------ */
+  function penaltyScore(matrix, size) {
+    let score = 0;
+
+    // Rule 1: runs of five or more modules of the same colour.
+    const scoreLine = (get) => {
+      let runColor = get(0);
+      let runLength = 1;
+      for (let i = 1; i < size; i++) {
+        const color = get(i);
+        if (color === runColor) {
+          runLength++;
+        } else {
+          if (runLength >= 5) score += 3 + (runLength - 5);
+          runColor = color;
+          runLength = 1;
+        }
+      }
+      if (runLength >= 5) score += 3 + (runLength - 5);
+    };
+    for (let i = 0; i < size; i++) {
+      scoreLine((j) => matrix[i][j]);
+      scoreLine((j) => matrix[j][i]);
+    }
+
+    // Rule 2: 2x2 blocks of the same colour.
+    for (let r = 0; r < size - 1; r++) {
+      for (let c = 0; c < size - 1; c++) {
+        const v = matrix[r][c];
+        if (v === matrix[r][c + 1] && v === matrix[r + 1][c] && v === matrix[r + 1][c + 1]) {
+          score += 3;
+        }
+      }
+    }
+
+    // Rule 3: 1:1:3:1:1 finder-like patterns with four light modules either side.
+    const PATTERN = [true, false, true, true, true, false, true];
+    const matchesAt = (get, index) => {
+      for (let k = 0; k < 7; k++) {
+        if (get(index + k) !== PATTERN[k]) return false;
+      }
+      const lightRun = (from) => {
+        for (let k = 0; k < 4; k++) {
+          const pos = from + k;
+          if (pos < 0 || pos >= size) continue; // outside counts as light (quiet zone)
+          if (get(pos) !== false) return false;
+        }
+        return true;
+      };
+      return lightRun(index - 4) || lightRun(index + 7);
+    };
+    for (let i = 0; i < size; i++) {
+      for (let j = 0; j <= size - 7; j++) {
+        if (matchesAt((k) => matrix[i][k], j)) score += 40;
+        if (matchesAt((k) => matrix[k][i], j)) score += 40;
+      }
+    }
+
+    // Rule 4: deviation of the dark module ratio from 50%.
+    let dark = 0;
+    for (let r = 0; r < size; r++) {
+      for (let c = 0; c < size; c++) if (matrix[r][c]) dark++;
+    }
+    const percent = (dark * 100) / (size * size);
+    score += Math.floor(Math.abs(percent - 50) / 5) * 10;
+
+    return score;
+  }
+
+  function buildMatrix(version, codewords, maskPattern) {
+    const size = version * 4 + 17;
+    const matrix = emptyMatrix(size);
+    placeFinderPatterns(matrix, size);
+    placeTimingPatterns(matrix, size);
+    placeAlignmentPatterns(matrix, version, size);
+    reserveFormatAreas(matrix, version, size);
+    writeVersionInformation(matrix, version, size);
+    placeData(matrix, size, codewords, maskPattern);
+    writeFormatInformation(matrix, size, maskPattern);
+    return matrix;
+  }
+
+  /**
+   * Encodes `text` into a QR symbol.
+   * @returns {{version:number, mask:number, size:number, modules:boolean[][]}}
+   */
+  function encode(text) {
+    const value = String(text ?? '');
+    if (!value) throw new Error('QR: matn bo\u2018sh bo\u2018lishi mumkin emas');
+    const { version, codewords } = buildCodewords(value);
+
+    let best = null;
+    for (let mask = 0; mask < 8; mask++) {
+      const matrix = buildMatrix(version, codewords, mask);
+      const score = penaltyScore(matrix, matrix.length);
+      if (!best || score < best.score) best = { mask, matrix, score };
+    }
+
+    return {
+      version,
+      mask: best.mask,
+      size: best.matrix.length,
+      modules: best.matrix,
+    };
+  }
+
+  /* ------------------------------------------------------------------ *
+   * Rendering helpers (browser only)
+   * ------------------------------------------------------------------ */
+  /**
+   * Draws a QR code for `text` onto a canvas element.
+   *
+   * `size` is an upper bound (the canvas never exceeds it), while `minSize`
+   * is a lower bound - useful for print/download exports where a guaranteed
+   * resolution matters more than an exact pixel size.
+   *
+   * @param {HTMLCanvasElement} canvas
+   * @param {string} text
+   * @param {{size?:number, minSize?:number, margin?:number, dark?:string, light?:string}} [options]
+   */
+  function drawOnCanvas(canvas, text, options = {}) {
+    const { size: targetSize = 320, minSize, margin = 4, dark = '#0b1b16', light = '#ffffff' } = options;
+    const { modules, size, version, mask } = encode(text);
+
+    const totalModules = size + margin * 2;
+    const pixelSize = minSize
+      ? Math.max(2, Math.ceil(minSize / totalModules))
+      : Math.max(2, Math.floor(targetSize / totalModules));
+    const canvasSize = pixelSize * totalModules;
+    const ratio = (typeof window !== 'undefined' && window.devicePixelRatio) || 1;
+
+    canvas.width = canvasSize * ratio;
+    canvas.height = canvasSize * ratio;
+    canvas.style.width = `${canvasSize}px`;
+    canvas.style.height = `${canvasSize}px`;
+
+    const ctx = canvas.getContext('2d');
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    ctx.fillStyle = light;
+    ctx.fillRect(0, 0, canvasSize, canvasSize);
+    ctx.fillStyle = dark;
+    for (let r = 0; r < size; r++) {
+      for (let c = 0; c < size; c++) {
+        if (!modules[r][c]) continue;
+        ctx.fillRect((c + margin) * pixelSize, (r + margin) * pixelSize, pixelSize, pixelSize);
+      }
+    }
+
+    return { version, mask, size, pixelSize };
+  }
+
+  return { encode, drawOnCanvas, rsEncode, formatInformation, versionInformation };
+})();
+
+
+/* ==================================================================
+   2-QISM. Saytning o‘z mantiqi
+   ================================================================== */
+(function () {
+  /* -------------------- kichik yordamchi funksiyalar ---------------- */
+  const $ = (id) => document.getElementById(id);
+  const icon = (name) => `<svg class="ico" aria-hidden="true"><use href="#i-${name}"></use></svg>`;
+
+  function escapeHtml(value) {
+    return String(value ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;');
+  }
+
+  function formatBytes(bytes) {
+    const value = Number(bytes) || 0;
+    if (value < 1024) return value + ' B';
+    const units = ['KB', 'MB', 'GB'];
+    let size = value / 1024, unit = 0;
+    while (size >= 1024 && unit < units.length - 1) { size /= 1024; unit++; }
+    return size.toFixed(size >= 10 ? 0 : 1).replace('.', ',') + ' ' + units[unit];
+  }
+
+  function formatDuration(seconds) {
+    if (!Number.isFinite(seconds) || seconds <= 0) return '';
+    const total = Math.round(seconds);
+    const h = Math.floor(total / 3600), m = Math.floor((total % 3600) / 60), s = total % 60;
+    const pad = (n) => String(n).padStart(2, '0');
+    return h > 0 ? `${h}:${pad(m)}:${pad(s)}` : `${m}:${pad(s)}`;
+  }
+
+  const MONTHS = ['yanvar', 'fevral', 'mart', 'aprel', 'may', 'iyun',
+    'iyul', 'avgust', 'sentabr', 'oktabr', 'noyabr', 'dekabr'];
+  function formatDate(iso) {
+    const date = new Date(iso);
+    if (Number.isNaN(date.getTime())) return '';
+    const time = String(date.getHours()).padStart(2, '0') + ':' + String(date.getMinutes()).padStart(2, '0');
+    return `${date.getDate()} ${MONTHS[date.getMonth()]} ${date.getFullYear()}, ${time}`;
+  }
+
+  function newId() {
+    const bytes = new Uint8Array(5);
+    crypto.getRandomValues(bytes);
+    return [...bytes].map((b) => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  function showBanner(title, text) {
+    $('banner-title').textContent = title;
+    $('banner-text').textContent = text;
+    $('banner').classList.add('is-visible');
+  }
+
+  /* ---------------------------- Saqlash ---------------------------- *
+   * Videolar IndexedDB’da (brauzer xotirasida) saqlanadi. Fayl to‘g‘ridan
+   * to‘g‘ri ochilganda (file://) ba’zi brauzerlar IndexedDB’ni bloklaydi —
+   * bunday holda vaqtinchalik (sessiya davomidagi) xotira ishlatiladi.
+   * ------------------------------------------------------------------ */
+  const DB_NAME = 'yer-maydonlari-video-arxivi';
+  const STORE = 'videos';
+
+  const storage = {
+    db: null,
+    memory: new Map(),
+    persistent: false,
+
+    async open() {
+      if (!window.indexedDB) return false;
+      try {
+        this.db = await new Promise((resolve, reject) => {
+          const request = indexedDB.open(DB_NAME, 1);
+          request.onupgradeneeded = () => {
+            const db = request.result;
+            if (!db.objectStoreNames.contains(STORE)) db.createObjectStore(STORE, { keyPath: 'id' });
+          };
+          request.onsuccess = () => resolve(request.result);
+          request.onerror = () => reject(request.error || new Error('IndexedDB ochilmadi'));
+          request.onblocked = () => reject(new Error('IndexedDB bloklandi'));
+          setTimeout(() => reject(new Error('IndexedDB javob bermadi')), 5000);
+        });
+        this.persistent = true;
+        return true;
+      } catch {
+        this.persistent = false;
+        return false;
+      }
+    },
+
+    run(mode, action) {
+      return new Promise((resolve, reject) => {
+        const tx = this.db.transaction(STORE, mode);
+        const request = action(tx.objectStore(STORE));
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+    },
+
+    async list() {
+      const items = this.persistent ? await this.run('readonly', (s) => s.getAll()) : [...this.memory.values()];
+      return items.sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
+    },
+
+    async get(id) {
+      return this.persistent ? this.run('readonly', (s) => s.get(id)) : this.memory.get(id);
+    },
+
+    async add(record) {
+      if (this.persistent) await this.run('readwrite', (s) => s.put(record));
+      else this.memory.set(record.id, record);
+      return record;
+    },
+
+    async remove(id) {
+      if (this.persistent) await this.run('readwrite', (s) => s.delete(id));
+      else this.memory.delete(id);
+    },
+  };
+
+  /* --------------------------- Fayl tanlash ------------------------- */
+  let selectedFile = null;
+  let previewUrl = null;
+
+  function setStatus(message, kind) {
+    const el = $('status');
+    el.className = 'status' + (kind ? ' status--' + kind : '');
+    el.innerHTML = message ? (kind === 'ok' ? icon('check') : '') + ' ' + escapeHtml(message) : '';
+  }
+
+  function selectFile(file) {
+    if (!file) return;
+    if (!file.type.startsWith('video/') && !/\.(mp4|webm|ogv|ogg|mov|mkv|m4v|avi|mpe?g|3gp)$/i.test(file.name)) {
+      setStatus('Faqat video fayl tanlash mumkin.', 'error');
+      return;
+    }
+    selectedFile = file;
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    previewUrl = URL.createObjectURL(file);
+
+    const preview = $('preview');
+    preview.src = previewUrl;
+    $('preview-name').textContent = file.name;
+    $('preview-meta').textContent = formatBytes(file.size);
+    $('dropzone').classList.add('has-file');
+    setStatus('');
+    preview.onloadedmetadata = () => {
+      const duration = formatDuration(preview.duration);
+      $('preview-meta').textContent = duration ? formatBytes(file.size) + ' · ' + duration : formatBytes(file.size);
+    };
+    if (!$('title').value.trim()) {
+      $('title').value = file.name.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ').trim().slice(0, 200);
+    }
+  }
+
+  $('file').addEventListener('change', (event) => selectFile(event.target.files[0]));
+  ['dragenter', 'dragover'].forEach((type) => $('dropzone').addEventListener(type, (e) => {
+    e.preventDefault(); $('dropzone').classList.add('is-over');
+  }));
+  ['dragleave', 'drop'].forEach((type) => $('dropzone').addEventListener(type, (e) => {
+    e.preventDefault(); $('dropzone').classList.remove('is-over');
+  }));
+  $('dropzone').addEventListener('drop', (event) => {
+    const file = event.dataTransfer && event.dataTransfer.files[0];
+    if (file) selectFile(file);
+  });
+
+  $('clear').addEventListener('click', () => {
+    $('form').reset();
+    selectedFile = null;
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    previewUrl = null;
+    $('preview').removeAttribute('src');
+    $('dropzone').classList.remove('has-file');
+    setStatus('');
+  });
+
+  /* ---------------- Muqova rasmi va davomiylik (brauzerda) ---------- */
+  function probe(file) {
+    return new Promise((resolve) => {
+      const url = URL.createObjectURL(file);
+      const video = document.createElement('video');
+      let settled = false;
+      const finish = (result) => {
+        if (settled) return;
+        settled = true;
+        URL.revokeObjectURL(url);
+        resolve(result);
+      };
+      const timer = setTimeout(() => finish({ duration: null, poster: null }), 12000);
+
+      video.muted = true;
+      video.playsInline = true;
+      video.preload = 'auto';
+      video.src = url;
+
+      video.onloadeddata = () => {
+        try { video.currentTime = Number.isFinite(video.duration) && video.duration > 2 ? 1 : 0; }
+        catch { draw(); }
+      };
+      video.onseeked = draw;
+      video.onerror = () => { clearTimeout(timer); finish({ duration: null, poster: null }); };
+
+      function draw() {
+        const duration = Number.isFinite(video.duration) ? video.duration : null;
+        try {
+          const width = video.videoWidth, height = video.videoHeight;
+          if (!width || !height) { clearTimeout(timer); return finish({ duration, poster: null }); }
+          const scale = Math.min(1, 640 / width);
+          const canvas = document.createElement('canvas');
+          canvas.width = Math.round(width * scale);
+          canvas.height = Math.round(height * scale);
+          canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+          clearTimeout(timer);
+          finish({ duration, poster: canvas.toDataURL('image/jpeg', 0.72) });
+        } catch {
+          clearTimeout(timer);
+          finish({ duration, poster: null });
+        }
+      }
+    });
+  }
+
+  /* ----------------------------- Saqlash --------------------------- */
+  $('form').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const title = $('title').value.trim();
+    if (!selectedFile) return setStatus('Avval video faylni tanlang.', 'error');
+    if (!title) return setStatus('Video nomini kiriting.', 'error');
+
+    $('submit').disabled = true;
+    setStatus('Video tahlil qilinmoqda…');
+    try {
+      const { duration, poster } = await probe(selectedFile);
+      const record = {
+        id: newId(),
+        title,
+        description: $('desc').value.trim(),
+        district: $('district').value.trim(),
+        area: $('area').value.trim(),
+        cadastre: $('cadastre').value.trim(),
+        location: $('location').value.trim(),
+        externalUrl: $('external').value.trim(),
+        fileName: selectedFile.name,
+        mimeType: selectedFile.type || 'video/mp4',
+        sizeBytes: selectedFile.size,
+        durationSeconds: duration,
+        poster,
+        blob: selectedFile,
+        createdAt: new Date().toISOString(),
+      };
+      await storage.add(record);
+      $('clear').click();
+      setStatus('Video saqlandi. Ro‘yxatdan tanlab QR-kodini ko‘rishingiz mumkin.', 'ok');
+      await refresh();
+      openVideo(record.id);
+    } catch (error) {
+      const tooBig = /quota|storage|space/i.test(String(error && error.name) + String(error && error.message));
+      setStatus(tooBig
+        ? 'Brauzer xotirasi yetmadi — kichikroq video tanlang yoki eski videolarni o‘chiring.'
+        : 'Saqlashda xatolik: ' + (error && error.message ? error.message : error), 'error');
+    } finally {
+      $('submit').disabled = false;
+    }
+  });
+
+  /* ---------------------------- Ro‘yxat ---------------------------- */
+  let videos = [];
+
+  function cardHtml(video) {
+    const chips = [
+      video.district ? `<span class="chip">${icon('pin')} ${escapeHtml(video.district)}</span>` : '',
+      video.area ? `<span class="chip">${icon('area')} ${escapeHtml(video.area)}</span>` : '',
+      video.cadastre ? `<span class="chip chip--plain">${icon('hash')} ${escapeHtml(video.cadastre)}</span>` : '',
+    ].join('');
+    const duration = formatDuration(video.durationSeconds);
+    return `
+      <article class="video-card">
+        <button class="video-card__thumb" type="button" data-open="${video.id}" aria-label="${escapeHtml(video.title)}">
+          ${video.poster ? `<img src="${video.poster}" alt="" />` : ''}
+          <span class="video-card__play" aria-hidden="true">${icon('play-circle')}</span>
+          ${duration ? `<span class="video-card__duration">${duration}</span>` : ''}
+        </button>
+        <div class="video-card__body">
+          <h3 class="video-card__title">${escapeHtml(video.title)}</h3>
+          ${video.description ? `<p class="video-card__desc">${escapeHtml(video.description)}</p>` : ''}
+          <div class="video-card__tags">${chips}</div>
+          <div class="muted" style="font-size:12.5px">${formatDate(video.createdAt)} · ${formatBytes(video.sizeBytes)}</div>
+          <div class="video-card__actions">
+            <button class="btn btn--sm" type="button" data-open="${video.id}">${icon('play')} Ko‘rish</button>
+            <button class="btn btn--outline btn--sm" type="button" data-open="${video.id}">${icon('qr')} QR-kod</button>
+            <button class="btn btn--danger btn--sm btn--icon" type="button" data-delete="${video.id}"
+                    title="Videoni o‘chirish" aria-label="Videoni o‘chirish">${icon('trash')}</button>
+          </div>
+        </div>
+      </article>`;
+  }
+
+  function render() {
+    const query = $('search').value.trim().toLowerCase();
+    const filtered = query
+      ? videos.filter((v) => [v.title, v.description, v.district, v.cadastre, v.location, v.area]
+        .join(' ').toLowerCase().includes(query))
+      : videos;
+
+    $('grid').innerHTML = filtered.map(cardHtml).join('');
+    $('empty').hidden = videos.length > 0;
+    if (videos.length > 0 && filtered.length === 0) {
+      $('grid').innerHTML = `<div class="empty" style="grid-column:1/-1">${icon('search')}
+        <span>«${escapeHtml($('search').value.trim())}» bo‘yicha video topilmadi.</span></div>`;
+    }
+    $('count').textContent = videos.length
+      ? filtered.length + ' ta video' + (filtered.length !== videos.length ? ' (jami ' + videos.length + ')' : '')
+      : '';
+  }
+
+  async function refresh() {
+    videos = await storage.list();
+    render();
+    updateStorageInfo();
+  }
+
+  async function updateStorageInfo() {
+    const total = videos.reduce((sum, v) => sum + (Number(v.sizeBytes) || 0), 0);
+    let text = videos.length ? 'Brauzerda saqlangan: ' + formatBytes(total) : '';
+    if (navigator.storage && navigator.storage.estimate) {
+      try {
+        const { quota } = await navigator.storage.estimate();
+        if (quota && videos.length) text += ' / ruxsat etilgan ' + formatBytes(quota);
+      } catch { /* ahamiyatsiz */ }
+    }
+    $('storage-info').textContent = text;
+  }
+
+  $('search').addEventListener('input', render);
+
+  $('grid').addEventListener('click', async (event) => {
+    const openBtn = event.target.closest('[data-open]');
+    if (openBtn) return openVideo(openBtn.dataset.open);
+
+    const deleteBtn = event.target.closest('[data-delete]');
+    if (!deleteBtn) return;
+    const id = deleteBtn.dataset.delete;
+    const video = videos.find((item) => item.id === id);
+    if (!window.confirm('«' + (video ? video.title : id) + '» videosi o‘chiriladi. Davom etamizmi?')) return;
+    await storage.remove(id);
+    if (current && current.id === id) closeViewer();
+    await refresh();
+  });
+
+  /* ------------------------- Ko‘rish paneli ------------------------ */
+  let current = null;
+  let currentUrl = null;
+
+  function detailRow(label, value) {
+    return value ? `<tr><th>${escapeHtml(label)}</th><td>${escapeHtml(value)}</td></tr>` : '';
+  }
+
+  /** Sahifa hostlangan bo‘lsa — shu sahifaning `?id=` havolasi. */
+  function pageLink(id) {
+    if (!/^https?:$/.test(window.location.protocol)) return '';
+    return window.location.origin + window.location.pathname + '?id=' + id;
+  }
+
+  function setQrStatus(message, kind) {
+    const el = $('qr-status');
+    el.className = 'status' + (kind ? ' status--' + kind : '');
+    el.innerHTML = message ? (kind === 'ok' ? icon('check') : '') + ' ' + escapeHtml(message) : '';
+    if (message) setTimeout(() => { el.innerHTML = ''; }, 2500);
+  }
+
+  function drawQr() {
+    const link = $('qr-link').value.trim();
+    const holder = $('qr-holder');
+    if (!link) {
+      holder.innerHTML = `<div class="qr-empty">QR-kod uchun havola yo‘q.<br />
+        Videoni internetda joylab, havolasini yuqoridagi maydonga kiriting —
+        QR-kod shu havolaga yaratiladi.</div>`;
+      return null;
+    }
+    holder.innerHTML = '<div class="qr-frame"><canvas id="qr-canvas" aria-label="Videoga havola QR-kodi"></canvas></div>';
+    try {
+      const info = QR.drawOnCanvas($('qr-canvas'), link, { size: 264, margin: 4 });
+      const canvas = $('qr-canvas');
+      canvas.title = `QR versiya ${info.version} (${info.size}×${info.size} modul)`;
+      canvas.dataset.qrVersion = String(info.version);
+      canvas.dataset.qrSize = String(info.size);
+      canvas.dataset.qrMargin = '4';
+      return info;
+    } catch (error) {
+      holder.innerHTML = `<div class="qr-empty">QR-kod yaratilmadi: ${escapeHtml(error.message)}</div>`;
+      return null;
+    }
+  }
+
+  async function openVideo(id) {
+    const video = await storage.get(id);
+    if (!video) return;
+    current = video;
+
+    if (currentUrl) URL.revokeObjectURL(currentUrl);
+    currentUrl = URL.createObjectURL(video.blob);
+
+    const player = $('player');
+    player.src = currentUrl;
+    if (video.poster) player.poster = video.poster;
+
+    $('v-title').textContent = video.title;
+    $('v-desc').textContent = video.description || 'Tasnif kiritilmagan.';
+    $('v-chips').innerHTML = [
+      video.district ? `<span class="chip">${icon('pin')} ${escapeHtml(video.district)}</span>` : '',
+      video.area ? `<span class="chip">${icon('area')} ${escapeHtml(video.area)}</span>` : '',
+      video.cadastre ? `<span class="chip chip--plain">${icon('hash')} ${escapeHtml(video.cadastre)}</span>` : '',
+      video.durationSeconds ? `<span class="chip chip--plain">${icon('clock')} ${formatDuration(video.durationSeconds)}</span>` : '',
+    ].join('');
+    $('v-details').innerHTML = [
+      detailRow('Tuman / shahar', video.district),
+      detailRow('Maydoni', video.area),
+      detailRow('Kadastr raqami', video.cadastre),
+      detailRow('Joylashuvi / koordinata', video.location),
+      detailRow('Davomiyligi', formatDuration(video.durationSeconds)),
+      detailRow('Fayl hajmi', formatBytes(video.sizeBytes)),
+      detailRow('Fayl nomi', video.fileName),
+      detailRow('Qo‘shilgan vaqti', formatDate(video.createdAt)),
+    ].join('');
+
+    $('qr-link').value = video.externalUrl || pageLink(video.id);
+    drawQr();
+
+    $('viewer').hidden = false;
+    $('viewer').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    history.replaceState(null, '', pageLink(video.id) ? '?id=' + video.id : window.location.href);
+  }
+
+  function closeViewer() {
+    $('viewer').hidden = true;
+    const player = $('player');
+    player.pause();
+    player.removeAttribute('src');
+    if (currentUrl) { URL.revokeObjectURL(currentUrl); currentUrl = null; }
+    current = null;
+    if (/^https?:$/.test(window.location.protocol)) {
+      history.replaceState(null, '', window.location.pathname);
+    }
+  }
+
+  $('v-close').addEventListener('click', closeViewer);
+
+  $('v-save').addEventListener('click', () => {
+    if (!current) return;
+    const anchor = document.createElement('a');
+    anchor.href = currentUrl;
+    anchor.download = current.fileName || current.title + '.mp4';
+    anchor.click();
+  });
+
+  $('qr-refresh').addEventListener('click', () => {
+    drawQr();
+    setQrStatus('QR-kod yangilandi', 'ok');
+  });
+  $('qr-link').addEventListener('change', () => drawQr());
+
+  $('qr-copy').addEventListener('click', async () => {
+    const link = $('qr-link').value.trim();
+    if (!link) return setQrStatus('Havola kiritilmagan', 'error');
+    try {
+      await navigator.clipboard.writeText(link);
+      setQrStatus('Havola nusxalandi', 'ok');
+    } catch {
+      window.prompt('Havolani nusxalab oling:', link);
+    }
+  });
+
+  $('qr-download').addEventListener('click', () => {
+    const link = $('qr-link').value.trim();
+    if (!link) return setQrStatus('Havola kiritilmagan', 'error');
+    const canvas = document.createElement('canvas');
+    try {
+      QR.drawOnCanvas(canvas, link, { minSize: 1024, margin: 4 });
+    } catch (error) {
+      return setQrStatus('QR-kod yaratilmadi: ' + error.message, 'error');
+    }
+    canvas.toBlob((blob) => {
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      const safe = (current ? current.title : 'video').replace(/[^\p{L}\p{N}\s-]/gu, '')
+        .trim().replace(/\s+/g, '-').slice(0, 60);
+      anchor.href = url;
+      anchor.download = 'QR-' + (safe || 'video') + '.png';
+      anchor.click();
+      URL.revokeObjectURL(url);
+      setQrStatus('QR-kod yuklab olindi', 'ok');
+    }, 'image/png');
+  });
+
+  $('qr-print').addEventListener('click', () => window.print());
+
+  /* ------------------------------ Boshlash ------------------------- */
+  (async function start() {
+    const ok = await storage.open();
+    if (!ok) {
+      showBanner('Videolar vaqtinchalik saqlanadi',
+        'Brauzer bu sahifada doimiy xotiradan (IndexedDB) foydalanishga ruxsat bermadi — '
+        + 'bu odatda HTML fayl to‘g‘ridan-to‘g‘ri ochilganda yuz beradi. Videolar faqat sahifa yopilguncha '
+        + 'saqlanadi. Doimiy saqlash uchun sahifani oddiy veb-server orqali oching.');
+    } else if (!/^https?:$/.test(window.location.protocol)) {
+      showBanner('QR-kod uchun havola kerak',
+        'Sahifa fayl sifatida ochilgani uchun QR-kodga yozadigan avtomatik havola yo‘q. '
+        + 'Videoni internetda joylab, havolasini “QR-kod uchun tashqi havola” maydoniga kiriting.');
+    }
+
+    await refresh();
+
+    const requested = new URLSearchParams(window.location.search).get('id');
+    if (requested && await storage.get(requested)) openVideo(requested);
+  })();
+})();
+</script>
+</body>
+</html>

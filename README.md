@@ -13,6 +13,31 @@ Sayt uch vazifani bajaradi:
 3. **QR-kod** — har bir video uchun unga olib boradigan havola QR-kod shaklida
    avtomatik yaratiladi, uni PNG sifatida yuklab olish yoki chop etish mumkin.
 
+## Ikki variant mavjud
+
+| Variant | Fayl | Qanday ishlatiladi | Qachon qulay |
+| ------- | ---- | ------------------ | ------------ |
+| **Oddiy (serversiz)** | `oddiy.html` | Faylni brauzerda ochish kifoya | Tez sinab ko‘rish, bitta kompyuterda ishlash |
+| **Server bilan** | `server.js` + `public/` | `node server.js` va `http://localhost:3000` | Haqiqiy sayt: videolar serverda turadi, QR havolasi hammada ishlaydi |
+
+### Oddiy variant: `oddiy.html`
+
+Bitta HTML fayl — **hech qanday o‘rnatish, server yoki internet talab qilinmaydi**.
+Faylni brauzerda ochasiz, videoni tanlaysiz, nomi va tasnifini kiritasiz, so‘ng
+player va QR-kod paydo bo‘ladi.
+
+- Videolar **shu brauzerning xotirasida** (IndexedDB) saqlanadi — sahifani yopib qayta
+  ochsangiz ham joyida turadi.
+- Videoni boshqa kompyuterga o‘tkazish uchun saqlangan faylni «Video faylni yuklab olish»
+  tugmasi orqali qaytarib olish mumkin.
+- **QR-kod haqida muhim jihat:** QR-kod havolaga ishlaydi, shuning uchun telefonda
+  ochilishi kerak bo‘lsa videoning internetdagi havolasi zarur. Uni «QR-kod uchun tashqi
+  havola» maydoniga kiritsangiz (yoki QR panelidagi havola maydonini tahrirlasangiz),
+  QR-kod aynan shu havolaga yaratiladi. Fayl brauzer xotirasida tursa, QR faqat shu
+  kompyuterdagi sahifani ochadi.
+- Brauzer xotirasi tozalansa, videolar ham o‘chadi. Ko‘p video va umumiy foydalanish
+  uchun quyidagi server variantini ishlating.
+
 ## Asosiy xususiyatlari
 
 - **Tashqi kutubxonalar yo‘q** — faqat Node.js standart modullari va vanilla JS
@@ -23,7 +48,7 @@ Sayt uch vazifani bajaradi:
 - Videolar `data/uploads/` papkasida, ma’lumotlar `data/videos.json` faylida saqlanadi
   (ma’lumotlar bazasi kerak emas).
 
-## Ishga tushirish
+## Server variantini ishga tushirish
 
 Node.js 18 yoki undan yuqori versiyasi kerak.
 
@@ -59,6 +84,7 @@ PORT=8080 PUBLIC_BASE_URL=https://video.namangan.uz DATA_DIR=/var/lib/video-arxi
 ## Loyiha tuzilishi
 
 ```
+oddiy.html             serversiz variant: bitta faylda butun sayt (QR generator ham ichida)
 server.js              HTTP server, yuklash va video oqimi (Range bilan)
 lib/store.js           videos.json ustida atomik yozuv (JSON «ombor»)
 public/index.html      bosh sahifa: yuklash formasi + videolar ro‘yxati
