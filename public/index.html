@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Yer maydonlari video arxivi — Namangan turistik-rekreatsion hududlari</title>
+  <meta name="description" content="PQ-220-son qarorining 7-ilovasiga muvofiq «Namangan turistik-rekreatsion hududlarini rivojlantirish direksiyasi»ga biriktirilgan yer maydonlari videolari." />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+  <!-- SVG ikonkalar to‘plami (emoji fontlariga bog‘liq bo‘lmasligi uchun) -->
+  <svg class="sprite" aria-hidden="true" focusable="false">
+    <defs>
+      <symbol id="i-mountain" viewBox="0 0 24 24"><path d="M2 19l6.5-10 4 6 3-4.5L22 19H2z" fill="currentColor"/></symbol>
+      <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+      <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4m0 0L8 8m4-4l4 4M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3"/></symbol>
+      <symbol id="i-video" viewBox="0 0 24 24"><path d="M3 6.5h12.5v11H3zM15.5 10.5l5.5-3.2v9.4l-5.5-3.2z"/></symbol>
+      <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5l12 7-12 7V5z" fill="currentColor" stroke="none"/></symbol>
+      <symbol id="i-play-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M10 8.5l6 3.5-6 3.5V8.5z" fill="currentColor" stroke="none"/></symbol>
+      <symbol id="i-qr" viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h2.5v2.5H14zM17.5 17.5H20V20h-2.5zM14 20h2.5M20 14v2.5"/></symbol>
+      <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 7V4.5h4V7M6.5 7l1 12.5h9L17.5 7M10.5 11v5M13.5 11v5"/></symbol>
+      <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 12a8 8 0 01-13.8 5.5M4 12a8 8 0 0113.8-5.5"/><path d="M18 3v4h-4M6 21v-4h4"/></symbol>
+      <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.4-4.4"/></symbol>
+      <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21.5S18.5 14.8 18.5 10a6.5 6.5 0 10-13 0c0 4.8 6.5 11.5 6.5 11.5z"/><circle cx="12" cy="10" r="2.3"/></symbol>
+      <symbol id="i-area" viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M4 9.5h3M4 14.5h3M9.5 20v-3M14.5 20v-3"/></symbol>
+      <symbol id="i-hash" viewBox="0 0 24 24"><path d="M9 4L7 20M17 4l-2 16M4 9h16M3 15h16"/></symbol>
+      <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+      <symbol id="i-link" viewBox="0 0 24 24"><path d="M9.5 14.5l5-5M10.5 7.5l1.2-1.2a4.2 4.2 0 016 6L16.5 13.5M13.5 16.5l-1.2 1.2a4.2 4.2 0 01-6-6L7.5 10.5"/></symbol>
+      <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11m0 0l-4-4m4 4l4-4M4.5 19.5h15"/></symbol>
+      <symbol id="i-print" viewBox="0 0 24 24"><path d="M7 8.5V4h10v4.5M5 8.5h14v7h-2.5M7 15.5H5M7 13h10v7H7z"/></symbol>
+      <symbol id="i-box" viewBox="0 0 24 24"><path d="M3 8l9-4 9 4v8l-9 4-9-4V8z"/><path d="M3 8l9 4 9-4M12 12v8"/></symbol>
+      <symbol id="i-arrow-left" viewBox="0 0 24 24"><path d="M19 12H5m0 0l6-6m-6 6l6 6"/></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 13l4.5 4.5L19 7"/></symbol>
+      <symbol id="i-lock" viewBox="0 0 24 24"><path d="M6 11h12v9H6zM8.5 11V7.5a3.5 3.5 0 017 0V11"/></symbol>
+      <symbol id="i-logout" viewBox="0 0 24 24"><path d="M14 5H6a1 1 0 00-1 1v12a1 1 0 001 1h8M17 8l3.5 4-3.5 4M20 12h-9"/></symbol>
+      <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+    </defs>
+  </svg>
+
+  <!-- Administrator kirishi -->
+  <dialog class="login-dialog" id="login-dialog">
+    <form id="login-form" method="dialog">
+      <h2>Administrator kirishi</h2>
+      <p class="muted">Video yuklash va o‘chirish uchun parolni kiriting. Videolarni ko‘rish uchun parol talab qilinmaydi.</p>
+      <label for="password">Parol</label>
+      <input type="password" id="password" autocomplete="current-password" required />
+      <div class="status" id="login-status" role="status" aria-live="polite"></div>
+      <div class="login-dialog__actions">
+        <button class="btn" type="submit" id="login-submit">
+          <svg class="ico"><use href="#i-lock"></use></svg> Kirish
+        </button>
+        <button class="btn btn--outline" type="button" id="login-cancel">Bekor qilish</button>
+      </div>
+    </form>
+  </dialog>
+
+  <header class="site-header">
+    <div class="wrap site-header__inner">
+      <span class="emblem" aria-hidden="true"><svg class="ico ico--lg"><use href="#i-mountain"></use></svg></span>
+      <div>
+        <div class="site-header__eyebrow">Video arxiv</div>
+        <h1>Yer maydonlari bo‘yicha video ma’lumotlar</h1>
+        <p class="site-header__legal">
+          O‘zbekiston Respublikasi Prezidentining 2026 yil 11 iyundagi PQ-220-son qarorining
+          7-ilovasiga muvofiq «Namangan turistik-rekreatsion hududlarini rivojlantirish direksiyasi»ga
+          doimiy foydalanish huquqi asosida biriktirilgan yer maydonlari haqida tayyorlangan videolar.
+        </p>
+      </div>
+      <nav class="site-header__nav">
+        <a class="btn btn--ghost" id="add-link" href="#yuklash" hidden>
+          <svg class="ico"><use href="#i-plus"></use></svg> Video yuklash
+        </a>
+        <button class="btn btn--ghost" type="button" id="login-btn" hidden>
+          <svg class="ico"><use href="#i-lock"></use></svg> Administrator kirishi
+        </button>
+        <button class="btn btn--ghost" type="button" id="logout-btn" hidden>
+          <svg class="ico"><use href="#i-logout"></use></svg> Chiqish
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <!-- Oddiy foydalanuvchi uchun izoh -->
+    <p class="public-note" id="public-note" hidden>
+      <svg class="ico" aria-hidden="true"><use href="#i-play-circle"></use></svg>
+      Quyidagi videolarni erkin ko‘rishingiz mumkin. Yangi video joylash huquqi
+      faqat direkciya administratoriga berilgan.
+    </p>
+
+    <!-- ------------------------- Yuklash formasi ------------------------- -->
+    <section class="card uploader" id="yuklash" hidden>
+      <div class="uploader__head">
+        <h2>Yangi video yuklash</h2>
+        <p>Videoni tanlang, nomi va tasnifini kiriting. Saqlangandan so‘ng video uchun QR-kod avtomatik yaratiladi.</p>
+      </div>
+
+      <form id="upload-form" class="form-grid" novalidate>
+        <!-- Fayl tanlash -->
+        <label class="dropzone" id="dropzone" for="video-file">
+          <input type="file" id="video-file" name="video" accept="video/*" />
+          <span class="dropzone__placeholder">
+            <svg class="ico ico--xl" aria-hidden="true"><use href="#i-video"></use></svg>
+            <span class="dropzone__title">Video faylni tanlang</span>
+            <span class="dropzone__hint">yoki faylni shu yerga tashlang<br />MP4, WebM, MOV, MKV — 512 MB gacha</span>
+          </span>
+          <span class="file-preview" id="file-preview">
+            <video id="preview-video" muted playsinline preload="metadata"></video>
+            <span class="file-preview__name" id="preview-name"></span>
+            <span class="file-preview__meta" id="preview-meta"></span>
+            <span class="dropzone__hint">Boshqa fayl tanlash uchun bosing</span>
+          </span>
+        </label>
+
+        <!-- Maydonlar -->
+        <div class="fields">
+          <div>
+            <label for="title">Video nomi <span class="req">*</span></label>
+            <input type="text" id="title" name="title" maxlength="200" required
+                   placeholder="Masalan: Chortoq tumani, 12-kontur yer maydoni" />
+          </div>
+
+          <div>
+            <label for="description">Video tasnifi (izoh)</label>
+            <textarea id="description" name="description" maxlength="4000"
+                      placeholder="Yer maydonining joylashuvi, maqsadli foydalanish turi, infratuzilma holati va boshqa ma’lumotlar…"></textarea>
+          </div>
+
+          <div class="fields__row">
+            <div>
+              <label for="district">Tuman / shahar</label>
+              <input type="text" id="district" name="district" list="districts" maxlength="120" placeholder="Chortoq tumani" />
+              <datalist id="districts">
+                <option value="Namangan shahri"></option>
+                <option value="Namangan tumani"></option>
+                <option value="Chortoq tumani"></option>
+                <option value="Chust tumani"></option>
+                <option value="Kosonsoy tumani"></option>
+                <option value="Mingbuloq tumani"></option>
+                <option value="Norin tumani"></option>
+                <option value="Pop tumani"></option>
+                <option value="To‘raqo‘rg‘on tumani"></option>
+                <option value="Uchqo‘rg‘on tumani"></option>
+                <option value="Uychi tumani"></option>
+                <option value="Yangiqo‘rg‘on tumani"></option>
+              </datalist>
+            </div>
+            <div>
+              <label for="area">Maydoni (gektar)</label>
+              <input type="text" id="area" name="area" maxlength="60" placeholder="4,5 ga" />
+            </div>
+            <div>
+              <label for="cadastre">Kadastr raqami</label>
+              <input type="text" id="cadastre" name="cadastre" maxlength="120" placeholder="06:12:03:01:05:0123" />
+            </div>
+            <div>
+              <label for="location">Joylashuvi / koordinata</label>
+              <input type="text" id="location" name="location" maxlength="200" placeholder="41.0561, 71.0827" />
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button class="btn" type="submit" id="submit-btn">
+              <svg class="ico"><use href="#i-upload"></use></svg> Saqlash va QR yaratish
+            </button>
+            <button class="btn btn--outline" type="reset" id="reset-btn">Tozalash</button>
+            <div class="progress" id="progress"><div class="progress__bar" id="progress-bar"></div></div>
+            <div class="status" id="status" role="status" aria-live="polite"></div>
+          </div>
+        </div>
+      </form>
+    </section>
+
+    <!-- ------------------------- Videolar ro‘yxati ----------------------- -->
+    <div class="section-title">
+      <h2>Yuklangan videolar</h2>
+      <span class="muted" id="count"></span>
+    </div>
+
+    <div class="toolbar">
+      <input type="search" id="search" placeholder="Nomi, tumani yoki kadastr raqami bo‘yicha qidirish…" />
+      <button class="btn btn--outline btn--sm" id="refresh-btn" type="button">
+        <svg class="ico"><use href="#i-refresh"></use></svg> Yangilash
+      </button>
+    </div>
+
+    <div class="video-grid" id="video-grid"></div>
+    <div class="empty" id="empty" hidden>
+      <svg class="ico ico--xl" aria-hidden="true"><use href="#i-box"></use></svg>
+      <span>Hozircha video yuklanmagan. Yuqoridagi forma orqali birinchi videoni qo‘shing.</span>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap site-footer__inner">
+      <span>«Namangan turistik-rekreatsion hududlarini rivojlantirish direksiyasi» — video arxiv</span>
+      <span>Har bir video uchun QR-kod havolasi avtomatik yaratiladi</span>
+    </div>
+  </footer>
+
+  <script type="module" src="/js/index.js"></script>
+</body>
+</html>

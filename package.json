@@ -1,0 +1,16 @@
+{
+  "name": "web-video-player",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Namangan turistik-rekreatsion hududlariga biriktirilgan yer maydonlari videolari uchun video-player sayti (QR havola bilan)",
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {},
+  "license": "UNLICENSED"
+}
